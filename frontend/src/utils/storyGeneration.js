@@ -5,9 +5,9 @@ import axios from 'axios';
  * Generates a story based on the provided characters and scenes
  * 
  * @param {object} storyData - Object containing characters and scenes
- * @returns {Array} Array of story sections
+ * @returns {Promise<Array<{title: string, content: string, imageId?: string}>>} Promise that resolves to an array of story sections
  */
-export const generateStory = async (storyData) => {
+export const generateStoryT = async (storyData) => {
   try {
     // Create prompt for the API
     const prompt = createStoryPrompt(storyData);
