@@ -1,0 +1,21 @@
+emotion-storyteller/
+├── frontend/                 # React application
+│   ├── public/
+│   └── src/
+│       ├── components/
+│       │   ├── DrawingCanvas.jsx
+│       │   ├── StoryDisplay.jsx
+│       │   ├── CharacterGallery.jsx
+│       │   └── EmotionControls.jsx
+│       ├── pages/
+│       │   ├── Home.jsx
+│       │   ├── CreateStory.jsx
+│       │   └── ReadStory.jsx
+│       ├── services/
+│       │   └── api.js
+│       └── App.jsx
+└── backend/                  # Flask server
+    ├── app.py
+    ├── ai_service.py
+    ├── image_processor.py
+    └── requirements.txt
