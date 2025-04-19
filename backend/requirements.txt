@@ -11,9 +11,11 @@ requests==2.32.3
 langchain==0.3.23
 
 python-dotenv
-# google-generativeai
+google-generativeai
 langchain_google_genai
 langchain-community
 beautifulsoup4
 
+deep_translator
+transformers
 spacy

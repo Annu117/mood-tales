@@ -18,31 +18,53 @@ def analyze_character_image(image_base64):
     Analyze a character drawing using Hugging Face's vision models
     """
     try:
+        if not image_base64:
+            raise ValueError("No image data provided")
+            
+        if not HF_API_TOKEN:
+            raise ValueError("Hugging Face API token not found. Please set HF_API_TOKEN in your .env file")
+            
         # Decode the base64 image
-        image_bytes = base64.b64decode(image_base64)
+        try:
+            image_bytes = base64.b64decode(image_base64)
+        except Exception as e:
+            raise ValueError(f"Invalid image data: {str(e)}")
         
         # Set up headers for Hugging Face API
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         
         # Get image caption from BLIP model
-        caption_response = requests.post(
-            IMAGE_CAPTIONING_API, 
-            headers=headers, 
-            data=image_bytes
-        )
-        caption_result = caption_response.json()
+        try:
+            caption_response = requests.post(
+                IMAGE_CAPTIONING_API, 
+                headers=headers, 
+                data=image_bytes,
+                timeout=10
+            )
+            caption_response.raise_for_status()
+            caption_result = caption_response.json()
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Failed to get image caption: {str(e)}")
         
         # Get image classification from ResNet model
-        classify_response = requests.post(
-            IMAGE_CLASSIFICATION_API, 
-            headers=headers, 
-            data=image_bytes
-        )
-        classification_result = classify_response.json()
+        try:
+            classify_response = requests.post(
+                IMAGE_CLASSIFICATION_API, 
+                headers=headers, 
+                data=image_bytes,
+                timeout=10
+            )
+            classify_response.raise_for_status()
+            classification_result = classify_response.json()
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Failed to classify image: {str(e)}")
         
         # Extract colors from image
-        image = Image.open(io.BytesIO(image_bytes))
-        colors = extract_dominant_colors(image)
+        try:
+            image = Image.open(io.BytesIO(image_bytes))
+            colors = extract_dominant_colors(image)
+        except Exception as e:
+            raise ValueError(f"Failed to process image: {str(e)}")
         
         # Determine emotion based on classification and caption
         emotion = determine_emotion(caption_result, classification_result)
@@ -329,5 +351,5 @@ def generate_story_with_character(character_analysis):
 #     # Fallback if no answer
 #     return {
 #         "title": "Oops! AI was sleepy...",
-#         "content": "We couldn’t craft a story this time. Try redrawing or changing the details!"
+#         "content": "We couldn't craft a story this time. Try redrawing or changing the details!"
 #     }

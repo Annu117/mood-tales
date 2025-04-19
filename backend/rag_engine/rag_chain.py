@@ -1,7 +1,5 @@
 # rag_engine/rag_chain.py
-# from langchain.chroma import Chroma
-from langchain.vectorstores import Chroma
-
+from langchain_community.vectorstores import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
