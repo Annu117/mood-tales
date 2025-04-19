@@ -7,29 +7,26 @@ import axios from 'axios';
  * @param {object} storyData - Object containing characters and scenes
  * @returns {Promise<Array<{title: string, content: string, imageId?: string}>>} Promise that resolves to an array of story sections
  */
-export const generateStoryT = async (storyData) => {
+export const generateStory = async (storyData) => {
   try {
     // Create prompt for the API
     const prompt = createStoryPrompt(storyData);
     
-    // In production, make an API call to the backend
-    const response = await axios.post('/api/generate-story', {
-      prompt,
-      characters: storyData.characters,
-      scenes: storyData.scenes
+    // Make an API call to the backend
+    const response = await axios.post('http://127.0.0.1:5000/api/start-story', {
+      theme: 'adventure',
+      storyLength: 2,
+      initialPrompt: prompt
     });
     
     // Return the story sections
-    return response.data.story;
+    return [{
+      title: 'Your Story',
+      content: response.data.storySegment
+    }];
     
   } catch (error) {
     console.error('Error generating story:', error);
-    
-    // For development/demo, if API is not available, generate a mock story
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      return generateMockStory(storyData);
-    }
-    
     throw new Error('Failed to generate story. Please try again later.');
   }
 };

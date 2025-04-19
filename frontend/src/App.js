@@ -12,6 +12,7 @@ import ReadStory from './pages/ReadStory';
 import Navbar from './components/Navbar';
 import DrawingPage from './pages/DrawingPage';
 import Story from './pages/Story';
+import Storytelling from './components/storytelling/Storytelling';
 
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
           <Route path="/draw" element={<DrawingPage />} /> {/* Subpart */}
           <Route path="*" element={<Home />} />
           <Route path= "/story" element={<Story />} />
+          <Route path= "/storytelling" element={<Storytelling />} />
+
         </Routes>
       </Router>
     </ThemeProvider>

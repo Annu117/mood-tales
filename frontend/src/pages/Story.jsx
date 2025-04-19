@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PreferencesPanel from '../components/PreferencesPanel';
-import { generateStoryT } from '../utils/storyGeneration';
+import { generateStory } from '../utils/storyGeneration';
 
 const Story = () => {
   const [age, setAge] = useState('');
@@ -12,7 +12,7 @@ const Story = () => {
   const [useMythology, setUseMythology] = useState(false);
   const [story, setStory] = useState([]);
 
-  const handleGenerateStoryT = async () => {
+  const handleGenerateStory = async () => {
     const storyData = {
       characters: [{
         name: characterName,
@@ -27,7 +27,7 @@ const Story = () => {
       }]
     };
 
-    const generated = await generateStoryT(storyData);
+    const generated = await generateStory(storyData);
     setStory(generated);
   };
 
@@ -49,7 +49,7 @@ const Story = () => {
         characterName={characterName}
         setCharacterName={setCharacterName}
       />
-      <button onClick={handleGenerateStoryT} style={{ marginTop: 20 }}>Generate Story</button>
+      <button onClick={handleGenerateStory} style={{ marginTop: 20 }}>Generate Story</button>
       <div style={{ marginTop: 30 }}>
         {story.map((section, index) => (
           <div key={index}>

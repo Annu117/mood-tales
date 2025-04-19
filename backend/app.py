@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask, request, jsonify
-# from flask_cors import CORS
+from flask_cors import CORS
 import base64
 import os
 import time
@@ -16,11 +16,14 @@ import random
 from dotenv import load_dotenv
 from ai_service import analyze_character_image, generate_story_with_character
 from image_processor import preprocess_image
+from routes.story_routes import story_bp
+
 
 load_dotenv()
 
 app = Flask(__name__)
-# CORS(app)  # Enable CORS for all /routes
+app.register_blueprint(story_bp)
+CORS(app)  # Enable CORS for all routes
 # Load spaCy model for entity detection
 nlp = spacy.load("en_core_web_sm")
 emotion_detector = pipeline("text-classification", model="joeddav/distilbert-base-uncased-go-emotions-student")
