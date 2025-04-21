@@ -6,12 +6,13 @@ import os
 import time
 import json
 import spacy
-
+import requests
 import openai
 from deep_translator import GoogleTranslator
 from transformers import pipeline
 from bs4 import BeautifulSoup
 import random
+from services.recognizer import recognize_speech
 
 from dotenv import load_dotenv
 from ai_service import analyze_character_image, generate_story_with_character
@@ -64,6 +65,11 @@ GLOBAL_MYTHOLOGY = {
     "quetzalcoatl": "Aztec feathered serpent god of wisdom",
 }
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+@app.route("/api/voice", methods=["GET"])
+def voice_input():
+    result = recognize_speech()
+    return jsonify(result)
 
 def detect_emotion(text):
     """Enhanced sentiment analysis using a deep learning model."""
@@ -189,67 +195,7 @@ def generate_story():
         'entity_info': entity_info,
         'language': language
     })
-
-# API route for text-to-speech
-@app.route('/api/tts', methods=['POST'])
-def text_to_speech():
-    data = request.json
-    text = data.get('text', '')
-    language = data.get('language', 'en')
     
-    # In a real application, you would use a TTS service here
-    # For demo purposes, we'll return a mock audio URL
-    audio_url = f"/api/audio/{int(time.time())}"
-    
-    return jsonify({
-        'audio_url': audio_url,
-        'duration': len(text) / 20  # Mock duration calculation
-    })
-
-# API route for speech-to-text
-@app.route('/api/stt', methods=['POST'])
-def speech_to_text():
-    # In a real app you'd process audio input here
-    # For demo purposes, we'll return a mock response
-    return jsonify({
-        'text': "Tell me a story about a brave knight"
-    })
-
-# API route to generate quiz/puzzle based on story
-@app.route('/api/puzzle', methods=['POST'])
-def generate_puzzle():
-    data = request.json
-    story_text = data.get('story_text', '')
-    
-    # Generate a simple puzzle based on the story
-    puzzle_types = ["fill_blank", "scramble", "logic"]
-    puzzle_type = random.choice(puzzle_types)
-    
-    # Mock puzzle generation (in a real app you'd use AI for this)
-    if puzzle_type == "fill_blank":
-        puzzle = {
-            "type": "fill_blank",
-            "question": "The hero picked up a mysterious _____.",
-            "options": ["sword", "map", "gem", "cloak"],
-            "answer": "gem"
-        }
-    elif puzzle_type == "scramble":
-        puzzle = {
-            "type": "scramble",
-            "question": "Unscramble the word: ROVENTAUDE",
-            "options": ["ADVENTURE", "DANGEROUS", "VENTURING", "ROUNDABOUT"],
-            "answer": "ADVENTURE"
-        }
-    else:
-        puzzle = {
-            "type": "logic",
-            "question": "If the hero met three animals, and each gave one gift, how many gifts does the hero have?",
-            "options": ["1", "2", "3", "4"],
-            "answer": "3"
-        }
-    
-    return jsonify(puzzle)
-
 @app.route('/api/analyze-character', methods=['POST'])
 def analyze_character():
     try:

@@ -1,156 +1,11 @@
-// import React, { useRef, useState, useEffect } from 'react';
-// import { Box, Paper, Button, Slider, Stack, Typography } from '@mui/material';
-// import { CirclePicker } from 'react-color';
-
-// const DrawingCanvas = ({ onSaveDrawing }) => {
-//   const canvasRef = useRef(null);
-//   const [context, setContext] = useState(null);
-//   const [drawing, setDrawing] = useState(false);
-//   const [color, setColor] = useState('#000000');
-//   const [brushSize, setBrushSize] = useState(5);
-//   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
-
-//   useEffect(() => {
-//     const canvas = canvasRef.current;
-//     const ctx = canvas.getContext('2d');
-//     ctx.lineJoin = 'round';
-//     ctx.lineCap = 'round';
-//     ctx.lineWidth = brushSize;
-//     setContext(ctx);
-    
-//     // Clear canvas with white background
-//     ctx.fillStyle = 'white';
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-//   }, []);
-
-//   useEffect(() => {
-//     if (context) {
-//       context.strokeStyle = color;
-//       context.lineWidth = brushSize;
-//     }
-//   }, [color, brushSize, context]);
-
-//   const startDrawing = (e) => {
-//     const { offsetX, offsetY } = getCoordinates(e);
-//     context.beginPath();
-//     context.moveTo(offsetX, offsetY);
-//     setLastPosition({ x: offsetX, y: offsetY });
-//     setDrawing(true);
-//   };
-
-//   const draw = (e) => {
-//     if (!drawing) return;
-    
-//     const { offsetX, offsetY } = getCoordinates(e);
-//     context.lineTo(offsetX, offsetY);
-//     context.stroke();
-//     setLastPosition({ x: offsetX, y: offsetY });
-//   };
-
-//   const stopDrawing = () => {
-//     context.closePath();
-//     setDrawing(false);
-//   };
-
-//   const getCoordinates = (e) => {
-//     if (e.touches && e.touches[0]) {
-//       const rect = canvasRef.current.getBoundingClientRect();
-//       return {
-//         offsetX: e.touches[0].clientX - rect.left,
-//         offsetY: e.touches[0].clientY - rect.top
-//       };
-//     }
-//     return {
-//       offsetX: e.nativeEvent.offsetX,
-//       offsetY: e.nativeEvent.offsetY
-//     };
-//   };
-
-//   const clearCanvas = () => {
-//     context.fillStyle = 'white';
-//     context.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-//   };
-
-//   const saveDrawing = () => {
-//     const image = canvasRef.current.toDataURL('image/png');
-//     onSaveDrawing(image);
-//   };
-
-//   return (
-//     <Paper elevation={3} sx={{ p: 2, maxWidth: 600, mx: 'auto' }}>
-//       <Typography variant="h6" gutterBottom>
-//         Draw Your Character
-//       </Typography>
-      
-//       <Box
-//         sx={{
-//           border: '1px solid #ccc',
-//           borderRadius: 2,
-//           overflow: 'hidden',
-//           mb: 2
-//         }}
-//       >
-//         <canvas
-//           ref={canvasRef}
-//           width={540}
-//           height={400}
-//           onMouseDown={startDrawing}
-//           onMouseMove={draw}
-//           onMouseUp={stopDrawing}
-//           onMouseLeave={stopDrawing}
-//           onTouchStart={startDrawing}
-//           onTouchMove={draw}
-//           onTouchEnd={stopDrawing}
-//           style={{ touchAction: 'none' }}
-//         />
-//       </Box>
-      
-//       <Stack spacing={2}>
-//         <Typography>Brush Size</Typography>
-//         <Slider
-//           value={brushSize}
-//           min={1}
-//           max={30}
-//           onChange={(e, newValue) => setBrushSize(newValue)}
-//         />
-        
-//         <Typography>Color</Typography>
-//         <CirclePicker
-//           color={color}
-//           onChange={(color) => setColor(color.hex)}
-//         />
-        
-//         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-//           <Button 
-//             variant="outlined" 
-//             onClick={clearCanvas}
-//             fullWidth
-//           >
-//             Clear
-//           </Button>
-//           <Button 
-//             variant="contained" 
-//             onClick={saveDrawing}
-//             fullWidth
-//           >
-//             Create Story
-//           </Button>
-//         </Stack>
-//       </Stack>
-//     </Paper>
-//   );
-// };
-
-// export default DrawingCanvas;
-
 import React, { useRef, useState, useEffect } from 'react';
 
 const DrawingCanvas = ({ onSaveDrawing }) => {
   const canvasRef = useRef(null);
   const [context, setContext] = useState(null);
   const [drawing, setDrawing] = useState(false);
-  const [color, setColor] = useState('#FF4136'); // Start with a fun red color
-  const [brushSize, setBrushSize] = useState(10); // Larger default brush for kids
+  const [color, setColor] = useState('#4e7de9'); // Using primary color from home screen
+  const [brushSize, setBrushSize] = useState(10);
   const [history, setHistory] = useState([]);
   const [canvasWidth, setCanvasWidth] = useState(800);
   const [canvasHeight, setCanvasHeight] = useState(500);
@@ -175,7 +30,7 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
       const container = canvas.parentElement;
       const newWidth = Math.min(container.clientWidth - 20, 800);
       setCanvasWidth(newWidth);
-      setCanvasHeight(newWidth * 0.625); // Maintain aspect ratio
+      setCanvasHeight(newWidth * 0.625);
     };
 
     handleResize();
@@ -183,7 +38,6 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Update context when color or brush size changes
   useEffect(() => {
     if (context) {
       context.strokeStyle = color;
@@ -210,7 +64,7 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
       context.drawImage(img, 0, 0);
       setHistory((prev) => prev.slice(0, -1));
     };
-    showTemporaryMessage("Undo!");
+    showTemporaryMessage("Undo successful!");
   };
 
   const startDrawing = (e) => {
@@ -282,28 +136,26 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [history]);
-
-  // Fun color options for kids
+  
+  // Fun color options matching the site's design
   const colorOptions = [
-    '#FF4136', // Red
-    '#FF851B', // Orange
-    '#FFDC00', // Yellow
-    '#2ECC40', // Green
-    '#0074D9', // Blue
-    '#B10DC9', // Purple
-    '#F012BE', // Magenta
-    '#111111', // Black
-    '#AAAAAA', // Gray
-    '#FFFFFF', // White
+    '#4e7de9', // Primary blue from gradient
+    '#ff6d00', // Orange from gradient
+    '#f44336', // Red
+    '#4caf50', // Green
+    '#9c27b0', // Purple
+    '#ffc107', // Yellow
+    '#000000', // Black
+    '#ffffff', // White
   ];
 
-  // Brush size options with fun names
+  // Brush size options with descriptive names
   const brushOptions = [
-    { name: "Tiny", size: 3 },
+    { name: "Thin", size: 3 },
     { name: "Small", size: 8 },
     { name: "Medium", size: 15 },
     { name: "Large", size: 25 },
-    { name: "HUGE!", size: 40 }
+    { name: "Extra Large", size: 40 }
   ];
 
   return (
@@ -312,10 +164,10 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
         maxWidth: '950px',
         margin: '0 auto',
         padding: '20px',
-        fontFamily: "'Comic Sans MS', 'Chalkboard SE', sans-serif"
+        fontFamily: 'inherit', // Using the site's font
       }}
       role="application"
-      aria-label="Drawing application for kids"
+      aria-label="Drawing application"
     >
       {/* Message pop-up */}
       {showMessage && (
@@ -325,15 +177,14 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            backgroundColor: '#FFEB3B',
-            color: '#333',
-            padding: '15px 30px',
-            borderRadius: '50px',
-            fontSize: '24px',
+            backgroundColor: '#ff6d00',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '999px', // Pill shape like home buttons
+            fontSize: '18px',
             fontWeight: 'bold',
             zIndex: 1000,
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-            animation: 'bounce 0.5s'
           }}
           role="status"
           aria-live="polite"
@@ -344,32 +195,31 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
 
       <div 
         style={{
-          backgroundColor: '#F0F8FF',
-          borderRadius: '20px',
-          padding: '20px',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-          border: '3px solid #4A90E2',
-          position: 'relative'
+          background: 'white',
+          borderRadius: '24px',
+          padding: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
         }}
       >
         <h1 
           style={{
             textAlign: 'center',
-            color: '#4A90E2',
-            fontSize: '32px',
+            color: '#4e7de9', // Primary blue from home
+            fontSize: '28px',
+            fontWeight: 700,
             marginBottom: '20px'
           }}
         >
-          🎨 Draw Your Amazing Character! 🎨
+          Draw Your Character
         </h1>
         
         <div 
           style={{
-            borderRadius: '15px',
+            borderRadius: '16px',
             overflow: 'hidden',
-            marginBottom: '20px',
-            border: '3px dashed #4A90E2',
-            backgroundColor: 'white',
+            marginBottom: '24px',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             display: 'flex',
             justifyContent: 'center'
           }}
@@ -397,11 +247,6 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
           />
         </div>
 
-        {/* Instruction for screen readers */}
-        <div className="sr-only" aria-live="polite">
-          Use mouse or touch to draw. Press Ctrl+Z to undo. Press Escape to clear canvas.
-        </div>
-        
         {/* Controls split into sections */}
         <div 
           style={{
@@ -413,16 +258,16 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
           {/* Color selection */}
           <div>
             <h2 
-              style={{ fontSize: '24px', marginBottom: '10px', color: '#4A90E2' }}
+              style={{ fontSize: '20px', marginBottom: '12px', color: '#333', fontWeight: 600 }}
               id="color-label"
             >
-              Pick a Color:
+              Choose a Color
             </h2>
             <div 
               style={{ 
                 display: 'flex', 
                 flexWrap: 'wrap', 
-                gap: '10px',
+                gap: '12px',
                 justifyContent: 'center' 
               }}
               role="radiogroup"
@@ -433,14 +278,14 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
                   key={colorOption}
                   onClick={() => setColor(colorOption)}
                   style={{
-                    width: '50px',
-                    height: '50px',
+                    width: '42px',
+                    height: '42px',
                     borderRadius: '50%',
                     background: colorOption,
                     cursor: 'pointer',
-                    border: color === colorOption ? '4px solid #333' : '2px solid #ccc',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                    transition: 'transform 0.2s',
+                    border: color === colorOption ? '3px solid #4e7de9' : '1px solid #ddd',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
                     transform: color === colorOption ? 'scale(1.1)' : 'scale(1)'
                   }}
                   aria-label={`Color ${colorOption}`}
@@ -454,10 +299,10 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
           {/* Brush size selection */}
           <div>
             <h2 
-              style={{ fontSize: '24px', marginBottom: '10px', color: '#4A90E2' }}
+              style={{ fontSize: '20px', marginBottom: '12px', color: '#333', fontWeight: 600 }}
               id="brush-label"
             >
-              Choose Brush Size:
+              Brush Size
             </h2>
             <div 
               style={{ 
@@ -474,15 +319,15 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
                   key={option.size}
                   onClick={() => setBrushSize(option.size)}
                   style={{
-                    padding: '10px 15px',
-                    borderRadius: '15px',
-                    border: brushSize === option.size ? '3px solid #4A90E2' : '1px solid #ccc',
-                    backgroundColor: brushSize === option.size ? '#E3F2FD' : 'white',
+                    padding: '8px 16px',
+                    borderRadius: '999px', // Pill shape like home buttons
+                    border: 'none',
+                    backgroundColor: brushSize === option.size ? '#4e7de9' : '#e0e0e0',
+                    color: brushSize === option.size ? 'white' : '#333',
                     cursor: 'pointer',
                     fontWeight: brushSize === option.size ? 'bold' : 'normal',
-                    fontSize: '18px',
+                    fontSize: '16px',
                     transition: 'all 0.2s',
-                    transform: brushSize === option.size ? 'scale(1.05)' : 'scale(1)'
                   }}
                   aria-label={`${option.name} brush size`}
                   aria-pressed={brushSize === option.size}
@@ -499,110 +344,83 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
               display: 'flex', 
               justifyContent: 'center',
               flexWrap: 'wrap',
-              gap: '15px',
-              marginTop: '10px' 
+              gap: '12px',
+              marginTop: '20px' 
             }}
           >
             <button
               onClick={undo}
               style={{
-                padding: '12px 25px',
-                fontSize: '20px',
-                backgroundColor: '#FFC107',
-                color: '#333',
-                border: 'none',
-                borderRadius: '15px',
+                padding: '10px 20px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+                color: '#4e7de9',
+                border: '1px solid #4e7de9',
+                borderRadius: '999px', // Pill shape like home buttons
                 cursor: 'pointer',
-                boxShadow: '0 4px 0 #DFA700',
-                transition: 'transform 0.1s, box-shadow 0.1s',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                transition: 'background-color 0.3s',
+                fontWeight: 500,
               }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(4px)';
-                e.currentTarget.style.boxShadow = '0 0 0 #DFA700';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 0 #DFA700';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(78, 125, 233, 0.1)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 0 #DFA700';
+                e.currentTarget.style.backgroundColor = 'white';
               }}
               aria-label="Undo last drawing action"
             >
-              ↩️ Oops! Undo
+              Undo
             </button>
 
             <button
               onClick={clearCanvas}
               style={{
-                padding: '12px 25px',
-                fontSize: '20px',
-                backgroundColor: '#FF5722',
-                color: 'white',
-                border: 'none',
-                borderRadius: '15px',
+                padding: '10px 20px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+                color: '#ff6d00',
+                border: '1px solid #ff6d00',
+                borderRadius: '999px', // Pill shape like home buttons
                 cursor: 'pointer',
-                boxShadow: '0 4px 0 #D84315',
-                transition: 'transform 0.1s, box-shadow 0.1s',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                transition: 'background-color 0.3s',
+                fontWeight: 500,
               }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(4px)';
-                e.currentTarget.style.boxShadow = '0 0 0 #D84315';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 0 #D84315';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 109, 0, 0.1)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 0 #D84315';
+                e.currentTarget.style.backgroundColor = 'white';
               }}
               aria-label="Clear the entire drawing"
             >
-              🧹 Start Over
+              Clear Canvas
             </button>
 
             <button
               onClick={saveDrawing}
               style={{
-                padding: '15px 30px',
-                fontSize: '24px',
-                backgroundColor: '#4CAF50',
+                padding: '12px 24px',
+                fontSize: '16px',
+                backgroundColor: '#ff6d00', // Secondary color from home
                 color: 'white',
                 border: 'none',
-                borderRadius: '15px',
+                borderRadius: '999px', // Pill shape like home buttons
                 cursor: 'pointer',
-                boxShadow: '0 5px 0 #388E3C',
-                transition: 'transform 0.1s, box-shadow 0.1s',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                fontWeight: 600,
               }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(5px)';
-                e.currentTarget.style.boxShadow = '0 0 0 #388E3C';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 5px 0 #388E3C';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 5px 0 #388E3C';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
               }}
               aria-label="Save your drawing and create a story"
             >
-              ✨ Create My Story! ✨
+              Create Story
             </button>
           </div>
         </div>
@@ -610,17 +428,17 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
         {/* Help text */}
         <div 
           style={{
-            marginTop: '20px',
-            padding: '15px',
-            backgroundColor: '#E8F5E9',
-            borderRadius: '15px',
-            fontSize: '18px',
-            color: '#388E3C',
+            marginTop: '24px',
+            padding: '12px',
+            backgroundColor: 'rgba(78, 125, 233, 0.1)', // Light primary color bg
+            borderRadius: '12px',
+            fontSize: '14px',
+            color: '#4e7de9', // Primary color
             textAlign: 'center'
           }}
           aria-live="polite"
         >
-          <p><strong>Tips:</strong> Click and drag to draw! Use Ctrl+Z to undo and Escape to clear.</p>
+          <p><strong>Tip:</strong> Use your mouse or finger to draw. Press Ctrl+Z for undo.</p>
         </div>
       </div>
 
@@ -635,10 +453,6 @@ const DrawingCanvas = ({ onSaveDrawing }) => {
       </div>
       
       <style jsx>{`
-        @keyframes bounce {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(-50%, -50%) scale(1.1); }
-        }
         .sr-only {
           position: absolute;
           width: 1px;

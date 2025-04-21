@@ -44,6 +44,13 @@ const Navbar = () => {
           >
             Create a Story
           </Button>
+          <Button 
+            sx={{ color: 'text.primary' }} 
+            component={RouterLink} 
+            to="/storytelling"
+          >
+            Interactive Story
+          </Button>
         </Toolbar>
       </Container>
     </AppBar>

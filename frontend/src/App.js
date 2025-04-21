@@ -12,7 +12,7 @@ import ReadStory from './pages/ReadStory';
 import Navbar from './components/Navbar';
 import DrawingPage from './pages/DrawingPage';
 import Story from './pages/Story';
-import Storytelling from './components/storytelling/Storytelling';
+import Storytelling from './pages/Storytelling';
 
 
 function App() {
