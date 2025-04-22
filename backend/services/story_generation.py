@@ -7,6 +7,9 @@ from functools import lru_cache
 import pickle
 from .rag_story_generator import RAGStoryGenerator
 from dotenv import load_dotenv
+import traceback
+from langdetect import detect, LangDetectException
+from deep_translator import GoogleTranslator
 
 load_dotenv() 
 
@@ -54,6 +57,7 @@ def get_age_range_from_length(story_length):
 def generate_with_gemini(prompt, story_length, theme, history=None):
     """Generate story content using Google's Gemini API."""
     if not GEMINI_API_KEY:
+        print("Gemini API key not found. Skipping Gemini generation.")
         return None
         
     try:
@@ -114,6 +118,7 @@ def generate_with_gemini(prompt, story_length, theme, history=None):
     
     except Exception as e:
         print(f"Error generating with Gemini: {e}")
+        traceback.print_exc()
         return None
 
 def generate_with_huggingface(prompt, story_length, theme, history=None):
@@ -181,29 +186,95 @@ def generate_with_huggingface(prompt, story_length, theme, history=None):
         print(f"Error generating with Hugging Face: {e}")
         return None
 
-def generate_story_segment(prompt, story_length, theme, history=None):
+def translate_text(text, target_lang='en'):
+    """Translate text to the target language."""
+    try:
+        if target_lang == 'en':
+            return text  # No translation needed for English
+        
+        translator = GoogleTranslator(source='auto', target=target_lang)
+        translated = translator.translate(text)
+        return translated
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return text  # Return original text if translation fails
+
+def generate_story_segment(prompt, story_length, theme, history=None, language='en'):
     """Main function to generate story content using RAG."""
+    if not filter_content_for_kids(prompt):
+        return "Let's use friendly words in our story! What would you like to happen next?"
+
     try:
         # Generate story using RAG
-        story = rag_generator.generate_story(prompt, history)
+        rag_generator.setup_rag_chain(theme)
+        word_count_map = {1: 50, 2: 100, 3: 200}
+        story = rag_generator.generate_story(prompt, history, word_count=word_count_map[story_length])
+
+        if not filter_content_for_kids(story):
+            return "Oops, something went wrong with the story. Let's try a new adventure!"
+
+        # Translate the story if needed
+        if language != 'en':
+            story = translate_text(story, language)
+
         return story
     except Exception as e:
         print(f"Error generating story with RAG: {e}")
         # Fallback to a simple story
         if history:
-            return f"Continuing our story... {prompt} What do you think happens next?"
+            fallback = f"Continuing our story... {prompt} What do you think happens next?"
         else:
-            return f"Once upon a time, in a magical kingdom far, far away, there lived a friendly dragon who loved to tell stories. {prompt} What kind of adventure would you like to hear about?"
+            fallback = f"Once upon a time, in a magical kingdom far, far away, there lived a friendly dragon who loved to tell stories. {prompt} What kind of adventure would you like to hear about?"
+        
+        # Translate fallback if needed
+        if language != 'en':
+            fallback = translate_text(fallback, language)
+        
+        return fallback
 
-# Load the list of inappropriate words
-with open("data/ibw_bad_words.pkl", "rb") as f:
-    inappropriate_words = set(pickle.load(f))
+# # Load the list of inappropriate words
+# with open("data/ibw_bad_words.pkl", "rb") as f:
+#     inappropriate_words = set(pickle.load(f))
+
+# def filter_content_for_kids(text):
+#     """Filter to ensure content is appropriate for children."""
+#     text_lower = text.lower()
+    
+#     for word in inappropriate_words:
+#         if word in text_lower:
+#             return False
+
+#     return True
+
+def load_ibw_words(filepath="data/ibw.txt"):
+    """Parses the IBW dataset into a dictionary of inappropriate words by language."""
+    ibw_by_lang = {}
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            parts = line.strip().split("\t")  # Dataset is tab-separated
+            if len(parts) < 2:
+                continue
+            word, lang = parts[0].lower(), parts[1].lower()
+            ibw_by_lang.setdefault(lang, set()).add(word)
+
+    return ibw_by_lang
+
+# Load at module level
+inappropriate_words_by_language = load_ibw_words("data/ibw_bad_words.txt")
+
 
 def filter_content_for_kids(text):
-    """Filter to ensure content is appropriate for children."""
+    """Detect language and filter out inappropriate content."""
+    try:
+        detected_lang = detect(text)
+    except LangDetectException:
+        detected_lang = "en"  # Default to English if detection fails
+
     text_lower = text.lower()
-    
-    for word in inappropriate_words:
+    bad_words = inappropriate_words_by_language.get(detected_lang, inappropriate_words_by_language.get("en", set()))
+
+    for word in bad_words:
         if word in text_lower:
             return False
 

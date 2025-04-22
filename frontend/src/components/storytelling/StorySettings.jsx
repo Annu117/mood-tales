@@ -16,6 +16,26 @@ import {
 } from '@mui/material';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import VoiceInput from './VoiceInput';
+import LanguageIcon from '@mui/icons-material/Language';
+
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'fr', name: 'French' },
+  { code: 'hi', name: 'Hindi' },
+  { code: 'zh', name: 'Chinese' },
+  { code: 'ar', name: 'Arabic' },
+  { code: 'de', name: 'German' },
+  { code: 'ja', name: 'Japanese' },
+  { code: 'ru', name: 'Russian' },
+  { code: 'pt', name: 'Portuguese' },
+  { code: 'bn', name: 'Bengali' },
+  { code: 'ur', name: 'Urdu' },
+  { code: 'te', name: 'Telugu' },
+  { code: 'ta', name: 'Tamil' },
+  { code: 'mr', name: 'Marathi' },
+  { code: 'ko', name: 'Korean' }
+];
 
 const StorySettings = ({ 
   theme, 
@@ -26,7 +46,9 @@ const StorySettings = ({
   setUserInput,
   isLoading,
   startNewStory,
-  handleKeyPress
+  handleKeyPress,
+  language,
+  setLanguage
 }) => {
   const muiTheme = useTheme();
   
@@ -51,23 +73,43 @@ const StorySettings = ({
           Story Settings
         </Typography>
         
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel id="theme-select-label">Theme</InputLabel>
-          <Select
-            labelId="theme-select-label"
-            id="theme-select"
-            value={theme}
-            label="Theme"
-            onChange={(e) => setTheme(e.target.value)}
-            aria-label="Select story theme"
-          >
-            <MenuItem value="adventure">Adventure</MenuItem>
-            <MenuItem value="fantasy">Fantasy</MenuItem>
-            <MenuItem value="space">Space</MenuItem>
-            <MenuItem value="animals">Animals</MenuItem>
-            <MenuItem value="underwater">Underwater</MenuItem>
-          </Select>
-        </FormControl>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <FormControl fullWidth>
+            <InputLabel id="theme-select-label">Story Theme</InputLabel>
+            <Select
+              labelId="theme-select-label"
+              value={theme}
+              label="Story Theme"
+              onChange={(e) => setTheme(e.target.value)}
+              disabled={isLoading}
+            >
+              <MenuItem value="adventure">Adventure</MenuItem>
+              <MenuItem value="fantasy">Fantasy</MenuItem>
+              <MenuItem value="mystery">Mystery</MenuItem>
+              <MenuItem value="animal">Animal Tales</MenuItem>
+              <MenuItem value="mythology">Mythology</MenuItem>
+              <MenuItem value="bedtime">Bedtime Stories</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel id="language-select-label">Language</InputLabel>
+            <Select
+              labelId="language-select-label"
+              value={language}
+              label="Language"
+              onChange={(e) => setLanguage(e.target.value)}
+              disabled={isLoading}
+              startAdornment={<LanguageIcon sx={{ mr: 1 }} />}
+            >
+              {LANGUAGES.map((lang) => (
+                <MenuItem key={lang.code} value={lang.code}>
+                  {lang.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
         
         <Typography id="story-length-slider-label" gutterBottom>
           Story Length
@@ -85,6 +127,7 @@ const StorySettings = ({
           onChange={(e, newValue) => setStoryLength(newValue)}
           sx={{ mb: 3 }}
           aria-labelledby="story-length-slider-label"
+          disabled={isLoading}
         />
         
         <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>

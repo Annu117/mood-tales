@@ -23,7 +23,7 @@ from routes.story_routes import story_bp
 load_dotenv()
 
 app = Flask(__name__)
-app.register_blueprint(story_bp)
+app.register_blueprint(story_bp, url_prefix='/api')
 CORS(app)  # Enable CORS for all routes
 # Load spaCy model for entity detection
 nlp = spacy.load("en_core_web_sm")

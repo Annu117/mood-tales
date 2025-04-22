@@ -78,7 +78,11 @@ const Storytelling = () => {
         body: JSON.stringify({
           theme: storyTheme,
           storyLength,
+
           initialPrompt: userInput || t("Tell me a story"),
+
+//           initialPrompt: userInput || "Tell me a story",
+
           language: language
         }),
       });
