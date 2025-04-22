@@ -5,6 +5,10 @@ import requests
 import random
 from functools import lru_cache
 import pickle
+from .rag_story_generator import RAGStoryGenerator
+from dotenv import load_dotenv
+
+load_dotenv() 
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 HUGGINGFACE_API_KEY = os.getenv("HF_API_TOKEN")
@@ -21,6 +25,9 @@ When continuing a story:
 3. Maintain consistency with previous events and characters
 4. End with an engaging question that invites the user to continue the story
 """
+
+# Initialize RAG story generator
+rag_generator = RAGStoryGenerator()
 
 def format_story_history(history):
     """Format the story history into a coherent narrative."""
@@ -175,36 +182,20 @@ def generate_with_huggingface(prompt, story_length, theme, history=None):
         return None
 
 def generate_story_segment(prompt, story_length, theme, history=None):
-    """Main function to generate story content with fallbacks."""
-    # Try Gemini first
-    story = generate_with_gemini(prompt, story_length, theme, history)
-    if story:
+    """Main function to generate story content using RAG."""
+    try:
+        # Generate story using RAG
+        story = rag_generator.generate_story(prompt, history)
         return story
-    
-    # Try Hugging Face as fallback
-    story = generate_with_huggingface(prompt, story_length, theme, history)
-    if story:
-        return story
-    
-    # If both APIs fail, return a friendly fallback message that incorporates user input
-    if history:
-        return f"Continuing our story... {prompt} What do you think happens next?"
-    else:
-        return f"Once upon a time, in a magical kingdom far, far away, there lived a friendly dragon who loved to tell stories. {prompt} What kind of adventure would you like to hear about?"
+    except Exception as e:
+        print(f"Error generating story with RAG: {e}")
+        # Fallback to a simple story
+        if history:
+            return f"Continuing our story... {prompt} What do you think happens next?"
+        else:
+            return f"Once upon a time, in a magical kingdom far, far away, there lived a friendly dragon who loved to tell stories. {prompt} What kind of adventure would you like to hear about?"
 
-# def filter_content_for_kids(text):
-#     """Simple filter to ensure content is appropriate for children."""
-#     inappropriate_words = [
-#         # List of inappropriate words to filter
-#         # This would be a more comprehensive list in production
-#     ]
-# def filter_content_for_kids(text, bad_words):
-#     words = text.lower().split()
-#     flagged = [word.strip(".,!?") for word in words if word.strip(".,!?") in bad_words]
-#     return len(flagged) == 0  # Returns True if clean
-
-
-# Load the list
+# Load the list of inappropriate words
 with open("data/ibw_bad_words.pkl", "rb") as f:
     inappropriate_words = set(pickle.load(f))
 

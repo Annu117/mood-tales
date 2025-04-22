@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const VoiceInput = ({ onInputReceived, disabled = false }) => {
   const [isListening, setIsListening] = useState(false);
@@ -111,7 +112,9 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
   }, [onInputReceived]);
   const tryBackendSpeechRecognition = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/voice");
+      // const response = await fetch("http://localhost:5000/api/voice");
+      const response = await fetch(`${API_BASE_URL}/voice`);
+
       const data = await response.json();
   
       if (data.success) {

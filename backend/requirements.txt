@@ -19,3 +19,6 @@ beautifulsoup4
 deep_translator
 transformers
 spacy
+
+chromadb
+tiktoken
