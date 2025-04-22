@@ -68,7 +68,7 @@ const Home = () => {
                 sx={{ fontWeight: 700 }}
                 id="hero-title"
               >
-                {t('Meet StoryPals: Your Emotion-Aware Storyteller')}
+                {t('Meet StoryPals: Your Interactive Storyteller')}
               </Typography>
               <Typography variant="h6" sx={{ mb: 4, opacity: 0.95 }}>
                 {t('Tell your mood, draw your characters, and let AI spin magical stories for you!')}

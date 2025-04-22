@@ -19,8 +19,9 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Fab, Zoom } from '@mui/material';
 import StoryReader from '../components/storytelling/StoryReader';
 import VoiceControls from '../components/storytelling/VoiceControls';
-
+import DrawingCanvas from '../components/DrawingCanvas';
 import { useLanguage } from '../utils/LanguageContext';
+import StoryExplanation from '../components/storytelling/StoryExplanation';
 
 const Storytelling = () => {
   const theme = useTheme();
@@ -33,9 +34,13 @@ const Storytelling = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [error, setError] = useState(null);
   const [announcement, setAnnouncement] = useState('');
+  const [showDrawing, setShowDrawing] = useState(false);
   const storyEndRef = useRef(null);
   const announcementRef = useRef(null);
   const [language, setLanguage] = useState('en'); // Default to English
+  const [drawingAnalysis, setDrawingAnalysis] = useState(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [currentExplanation, setCurrentExplanation] = useState(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -117,9 +122,20 @@ const Storytelling = () => {
   const continueStory = async () => {
     if (!userInput.trim()) return;
     
+    // Check if the input contains a drawing
+    const isDrawing = userInput.startsWith('[Drawing:');
+    let processedInput = userInput;
+    
+    if (isDrawing) {
+      // Extract the drawing description
+      processedInput = userInput.match(/\[Drawing: (.*?)\]/)[1];
+    }
+    
+    // Add user input to history
     setStoryHistory([...storyHistory, {
       type: 'user',
-      content: userInput
+      content: processedInput,
+      ...(isDrawing && { drawing: userInput.match(/\[Drawing: (.*?)\]/)[0] })
     }]);
     
     setIsLoading(true);
@@ -134,12 +150,14 @@ const Storytelling = () => {
         body: JSON.stringify({
           storyHistory: storyHistory.map(item => ({
             role: item.type === 'user' ? 'user' : 'assistant',
-            content: item.content
+            content: item.content,
+            ...(item.drawing && { drawing: item.drawing })
           })),
-          userInput,
+          userInput: processedInput,
           storyLength,
           theme: storyTheme,
-          language: language
+          language: language,
+          ...(isDrawing && { drawing: userInput.match(/\[Drawing: (.*?)\]/)[0] })
         }),
       });
       
@@ -186,6 +204,49 @@ const Storytelling = () => {
 
   const handleErrorClose = () => {
     setError(null);
+  };
+
+  const handleDrawingSubmit = async (imageData) => {
+    setShowDrawing(false);
+    setIsLoading(true);
+    setAnnouncement(t('Analyzing your drawing...'));
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/analyze-drawing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageData,
+          language: language
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const description = `[Drawing: ${data.description}]`;
+      setUserInput(description);
+      setDrawingAnalysis(data);
+      setAnnouncement(t('Drawing analyzed! You can now continue your story.'));
+    } catch (error) {
+      console.error('Error analyzing drawing:', error);
+      setError(t('Failed to analyze drawing. Please try again.'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStoryResponse = (response) => {
+    setStoryHistory(prev => [...prev, {
+      type: 'ai',
+      content: response.story
+    }]);
+    setCurrentExplanation(response.explanation);
+    setShowExplanation(true);
   };
 
   return (
@@ -310,13 +371,21 @@ const Storytelling = () => {
 
               <VoiceControls storyHistory={storyHistory} language={language} />
 
-              <StoryInput 
-                userInput={userInput}
-                setUserInput={setUserInput}
-                isLoading={isLoading}
-                continueStory={continueStory}
-                handleKeyPress={handleKeyPress}
-              />
+              {showDrawing ? (
+                <Box sx={{ mb: 3 }}>
+                  <DrawingCanvas onSaveDrawing={handleDrawingSubmit} />
+                </Box>
+              ) : (
+                <StoryInput 
+                  userInput={userInput}
+                  setUserInput={setUserInput}
+                  isLoading={isLoading}
+                  continueStory={continueStory}
+                  handleKeyPress={handleKeyPress}
+                  onShowDrawing={() => setShowDrawing(true)}
+                  drawingAnalysis={drawingAnalysis}
+                />
+              )}
               
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                 <Button 
@@ -377,6 +446,13 @@ const Storytelling = () => {
           </Alert>
         </Snackbar>
       </Container>
+
+      {showExplanation && (
+        <StoryExplanation
+          explanation={currentExplanation}
+          onClose={() => setShowExplanation(false)}
+        />
+      )}
     </>
   );
 };
