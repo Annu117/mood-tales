@@ -18,6 +18,8 @@ import StoryInput from '../components/storytelling/StoryInput';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Fab, Zoom } from '@mui/material';
 import StoryReader from '../components/storytelling/StoryReader';
+import VoiceControls from '../components/storytelling/VoiceControls';
+
 import { useLanguage } from '../utils/LanguageContext';
 
 const Storytelling = () => {
@@ -305,6 +307,8 @@ const Storytelling = () => {
                 <StoryReader storyHistory={storyHistory} />
                 <div ref={storyEndRef} tabIndex={-1} />
               </Paper>
+
+              <VoiceControls storyHistory={storyHistory} language={language} />
 
               <StoryInput 
                 userInput={userInput}

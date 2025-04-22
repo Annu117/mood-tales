@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import base64
 import os
@@ -13,6 +13,11 @@ from transformers import pipeline
 from bs4 import BeautifulSoup
 import random
 from services.recognizer import recognize_speech
+from gtts import gTTS
+import tempfile
+import uuid
+from flask import send_file
+from gtts.lang import tts_langs
 
 from dotenv import load_dotenv
 from ai_service import analyze_character_image, generate_story_with_character
@@ -240,6 +245,52 @@ def generate_story_rag():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "message": "Server is running"})
+
+@app.route('/api/text-to-speech', methods=['POST'])
+def text_to_speech():
+    try:
+        data = request.json
+        text = data.get('text')
+        language = data.get('language', 'en')
+        
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        # Create a temporary file
+        temp_dir = tempfile.gettempdir()
+        filename = f"{uuid.uuid4()}.mp3"
+        filepath = os.path.join(temp_dir, filename)
+        
+        try:
+            # Generate speech with error handling for unsupported languages
+            tts = gTTS(text=text, lang=language)
+            tts.save(filepath)
+        except Exception as e:
+            # If language is not supported, fall back to English
+            if "language not supported" in str(e).lower():
+                print(f"Language {language} not supported, falling back to English")
+                tts = gTTS(text=text, lang='en')
+                tts.save(filepath)
+            else:
+                raise e
+        
+        # Send the file
+        return send_file(
+            filepath,
+            mimetype='audio/mpeg',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        print(f"Error in text-to-speech: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        # Clean up the temporary file
+        if 'filepath' in locals():
+            try:
+                os.remove(filepath)
+            except:
+                pass
 
 if __name__ == '__main__':
     app.run(debug=True)
