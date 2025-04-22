@@ -1,0 +1,54 @@
+<svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6a5acd"/>
+      <stop offset="100%" stop-color="#FF8E53"/>
+    </linearGradient>
+    <linearGradient id="screenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eee6ff"/>
+      <stop offset="100%" stop-color="#ffe1d3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="500" height="400" fill="none" rx="20" ry="20"/>
+
+  <!-- Tablet/Device -->
+  <rect x="60" y="70" width="380" height="280" rx="15" ry="15" fill="none" stroke="url(#borderGradient)" stroke-width="8"/>
+  <rect x="80" y="90" width="340" height="220" rx="5" ry="5" fill="url(#screenGradient)"/>
+  
+  <!-- Story elements on screen -->
+  <circle cx="140" cy="130" r="30" fill="#ff6d00" opacity="0.8"/>
+  <rect x="190" y="110" width="200" height="15" rx="3" ry="3" fill="#4e7de9" opacity="0.7"/>
+  <rect x="190" y="135" width="160" height="15" rx="3" ry="3" fill="#4e7de9" opacity="0.5"/>
+  
+  <!-- Simple storybook scene -->
+  <rect x="110" y="170" width="280" height="110" rx="5" ry="5" fill="#ffffff"/>
+  <path d="M130,260 Q170,200 210,260 Q250,200 290,260 Q330,200 370,260" fill="none" stroke="#4e7de9" stroke-width="3"/>
+  <circle cx="340" cy="210" r="20" fill="#ff6d00" opacity="0.8"/>
+  <circle cx="190" cy="225" r="15" fill="#4e7de9" opacity="0.6"/>
+  
+  <!-- Child silhouette -->
+  <ellipse cx="250" cy="350" rx="50" ry="10" fill="#000000" opacity="0.2"/>
+  <circle cx="250" cy="270" r="30" fill="#5d4037"/>
+  <rect x="220" y="300" width="60" height="50" rx="15" ry="15" fill="#5d4037"/>
+  
+  <!-- Arms -->
+  <path d="M220,310 Q190,330 180,290" stroke="#5d4037" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M280,310 Q310,330 340,300" stroke="#5d4037" stroke-width="10" fill="none" stroke-linecap="round"/>
+  
+  <!-- Face -->
+  <circle cx="240" cy="265" r="4" fill="white"/>
+  <circle cx="260" cy="265" r="4" fill="white"/>
+  <path d="M240,280 Q250,290 260,280" fill="none" stroke="white" stroke-width="2"/>
+  
+  <!-- Sparkles/Magic -->
+  <path d="M180,130 L185,135 L190,130 L185,125 Z" fill="#ffeb3b"/>
+  <path d="M350,150 L355,155 L360,150 L355,145 Z" fill="#ffeb3b"/>
+  <path d="M130,220 L135,225 L140,220 L135,215 Z" fill="#ffeb3b"/>
+  <path d="M370,230 L375,235 L380,230 L375,225 Z" fill="#ffeb3b"/>
+  
+  <!-- Connecting lines between child and story -->
+  <path d="M240,250 Q230,210 200,200" stroke="#ff6d00" stroke-width="2" stroke-dasharray="5,3" fill="none"/>
+  <path d="M260,250 Q280,220 320,210" stroke="#4e7de9" stroke-width="2" stroke-dasharray="5,3" fill="none"/>
+</svg>

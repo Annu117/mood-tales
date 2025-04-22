@@ -1,0 +1,97 @@
+<svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with soft gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f7ff" />
+      <stop offset="100%" stop-color="#fff0e6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="500" height="400" fill="url(#bgGradient)" rx="20" ry="20"/>
+  
+  <!-- Floating clouds -->
+  <ellipse cx="80" cy="60" rx="50" ry="25" fill="white" opacity="0.7"/>
+  <ellipse cx="430" cy="40" rx="40" ry="20" fill="white" opacity="0.7"/>
+  <ellipse cx="150" cy="40" rx="30" ry="15" fill="white" opacity="0.7"/>
+  <ellipse cx="380" cy="70" rx="35" ry="18" fill="white" opacity="0.7"/>
+  
+  <!-- Digital tablet -->
+  <rect x="130" y="80" width="240" height="180" rx="15" ry="15" fill="#5a86f0" filter="url(#shadow)"/>
+  <rect x="140" y="90" width="220" height="150" rx="8" ry="8" fill="#ffffff"/>
+  
+  <!-- Story scene on tablet screen -->
+  <rect x="150" y="100" width="200" height="30" rx="5" ry="5" fill="#ffedd8"/>
+  <circle cx="165" cy="115" r="10" fill="#ff8d3a"/>
+  <rect x="185" y="108" width="100" height="14" rx="2" ry="2" fill="#4e7de9" opacity="0.7"/>
+  
+  <!-- Story illustration -->
+  <rect x="150" y="140" width="200" height="90" rx="5" ry="5" fill="#e9f5ff"/>
+  
+  <!-- Simple castle -->
+  <rect x="200" y="160" width="50" height="50" fill="#ffb74d"/>
+  <rect x="190" y="160" width="70" height="10" fill="#ffb74d"/>
+  <rect x="195" y="150" width="10" height="10" fill="#ffb74d"/>
+  <rect x="215" y="150" width="10" height="10" fill="#ffb74d"/>
+  <rect x="235" y="150" width="10" height="10" fill="#ffb74d"/>
+  
+  <!-- Rainbow -->
+  <path d="M300,190 C320,160 340,160 360,190" stroke="#ff9999" stroke-width="6" fill="none"/>
+  <path d="M300,198 C320,168 340,168 360,198" stroke="#ffcc99" stroke-width="6" fill="none"/>
+  <path d="M300,206 C320,176 340,176 360,206" stroke="#ffff99" stroke-width="6" fill="none"/>
+  <path d="M300,214 C320,184 340,184 360,214" stroke="#ccff99" stroke-width="6" fill="none"/>
+  <path d="M300,222 C320,192 340,192 360,222" stroke="#99ccff" stroke-width="6" fill="none"/>
+  
+  <!-- Child with rounded features -->
+  <circle cx="250" cy="300" r="35" fill="#fff0db"/> <!-- head -->
+  <ellipse cx="250" cy="358" rx="40" ry="12" fill="#333" opacity="0.2"/> <!-- shadow -->
+  
+  <!-- Hair -->
+  <path d="M230,280 C210,260 215,240 230,270" fill="#8a5d3b"/>
+  <path d="M270,280 C290,260 285,240 270,270" fill="#8a5d3b"/>
+  <path d="M225,275 Q250,255 275,275" fill="#8a5d3b"/>
+  
+  <!-- Body -->
+  <path d="M230,330 C230,300 270,300 270,330 L265,350 Q250,355 235,350 Z" fill="#ff7bac"/>
+  
+  <!-- Arms -->
+  <path d="M230,310 Q205,315 190,290" stroke="#fff0db" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M270,310 Q295,315 310,290" stroke="#fff0db" stroke-width="12" fill="none" stroke-linecap="round"/>
+  
+  <!-- Face -->
+  <circle cx="237" cy="290" r="5" fill="white"/> <!-- left eye background -->
+  <circle cx="263" cy="290" r="5" fill="white"/> <!-- right eye background -->
+  <circle cx="237" cy="290" r="3" fill="#5271ff"/> <!-- left eye -->
+  <circle cx="263" cy="290" r="3" fill="#5271ff"/> <!-- right eye -->
+  <path d="M240,306 Q250,316 260,306" stroke="#ff5c8d" stroke-width="2" fill="none"/> <!-- smile -->
+  <circle cx="237" cy="287" r="1" fill="white"/>
+  <circle cx="263" cy="287" r="1" fill="white"/>
+  <path d="M235,280 Q240,275 245,280" stroke="#8a5d3b" stroke-width="1.5" fill="none"/> <!-- left eyebrow -->
+  <path d="M255,280 Q260,275 265,280" stroke="#8a5d3b" stroke-width="1.5" fill="none"/> <!-- right eyebrow -->
+  <circle cx="250" cy="298" r="3" fill="#ff9e9e" opacity="0.8"/> <!-- nose -->
+  
+  <!-- Stars and sparkles -->
+  <path d="M175,135 L178,145 L185,135 L175,132 L185,129 L178,125 Z" fill="#ffeb3b"/>
+  <path d="M325,115 L328,125 L335,115 L325,112 L335,109 L328,105 Z" fill="#ffeb3b"/>
+  <path d="M195,200 L198,210 L205,200 L195,197 L205,194 L198,190 Z" fill="#ff7bac"/>
+  
+  <!-- Magic connecting lines -->
+  <path d="M200,160 Q225,200 230,280" stroke="#4e7de9" stroke-width="2" stroke-dasharray="5,3" fill="none"/>
+  <path d="M300,190 Q285,230 270,280" stroke="#ff6d00" stroke-width="2" stroke-dasharray="5,3" fill="none"/>
+  
+  <!-- Floating thought bubbles -->
+  <ellipse cx="340" cy="240" rx="30" ry="20" fill="white" stroke="#4e7de9" stroke-width="2"/>
+  <circle cx="375" cy="245" r="8" fill="white" stroke="#4e7de9" stroke-width="2"/>
+  <circle cx="385" cy="250" r="4" fill="white" stroke="#4e7de9" stroke-width="2"/>
+  
+  <ellipse cx="160" cy="250" rx="25" ry="15" fill="white" stroke="#ff6d00" stroke-width="2"/>
+  <circle cx="130" cy="245" r="7" fill="white" stroke="#ff6d00" stroke-width="2"/>
+  <circle cx="120" cy="240" r="3" fill="white" stroke="#ff6d00" stroke-width="2"/>
+  
+  <!-- Book icon on tablet -->
+  <rect x="320" cy="115" width="20" height="15" rx="2" ry="2" fill="#4e7de9"/>
+  <path d="M320,115 Q330,110 340,115" stroke="#4e7de9" stroke-width="2" fill="none"/>
+</svg>

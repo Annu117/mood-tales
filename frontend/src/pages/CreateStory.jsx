@@ -31,6 +31,7 @@ const CreateStory = () => {
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   const steps = [
     t('Draw Character'),
@@ -51,6 +52,7 @@ const CreateStory = () => {
     setCharacterImage(imageData);
     setLoading(true);
     setError(null);
+    setIsDrawing(false);
 
     try {
       const analysis = await analyzeCharacter(imageData);
@@ -82,6 +84,16 @@ const CreateStory = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStartDrawing = () => {
+    setIsDrawing(true);
+    setError(null);
+  };
+
+  const handleCancelDrawing = () => {
+    setIsDrawing(false);
+    setCharacterImage(null);
   };
 
   const renderCharacterAnalysis = () => {
@@ -183,7 +195,33 @@ const CreateStory = () => {
         </Box>
       )}
 
-      {!loading && activeStep === 0 && <DrawingCanvas onSaveDrawing={handleSaveDrawing} />}
+      {!loading && activeStep === 0 && (
+        <Box sx={{ textAlign: 'center' }}>
+          {!isDrawing ? (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleStartDrawing}
+              sx={{ mb: 3 }}
+            >
+              {t("Start Drawing")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancelDrawing}
+                sx={{ mb: 3 }}
+              >
+                {t("Cancel Drawing")}
+              </Button>
+              <DrawingCanvas onSaveDrawing={handleSaveDrawing} />
+            </>
+          )}
+        </Box>
+      )}
+
       {!loading && activeStep === 1 && renderCharacterAnalysis()}
       {!loading && activeStep === 2 && story && <StoryDisplay story={story} characterImage={characterImage} />}
     </Container>

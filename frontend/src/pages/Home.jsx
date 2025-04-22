@@ -14,7 +14,8 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import CreateIcon from '@mui/icons-material/Create';
 import { useLanguage } from '../utils/LanguageContext';
-
+import kidStorytelling from '../assets/kid-storytelling.svg';
+import kidstory from '../assets/kid-storytelling.svg';
 const Home = () => {
   const theme = useTheme();
   const { t } = useLanguage();
@@ -131,12 +132,15 @@ const Home = () => {
             <Grid item xs={12} md={6}>
               <Box
                 component="img"
-                src="/api/placeholder/500/400"
+                // src="/api/placeholder/500/400"
+                src = {kidStorytelling}
+                // src={kidstory}
+                // src="../assets/kid-storytelling.svg" 
                 alt={t('Kid interacting with AI storytelling app')}
                 sx={{
                   width: '100%',
                   borderRadius: 6,
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                  // boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
                 }}
               />
             </Grid>
