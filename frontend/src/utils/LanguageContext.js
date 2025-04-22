@@ -5,7 +5,12 @@ const LanguageContext = createContext();
 
 export const languages = {
   en: 'English',
-  hi: 'हिंदी'
+  hi: 'हिंदी',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  ja: '日本語',
+  zh: '中文'
 };
 
 export const LanguageProvider = ({ children }) => {

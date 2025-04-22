@@ -1,11 +1,21 @@
 // components/Navbar.jsx
 
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Container, Menu, MenuItem, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Container, Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useLanguage, languages } from '../utils/LanguageContext';
+
+const languageFlags = {
+  en: '🇺🇸',
+  hi: '🇮🇳',
+  es: '🇪🇸',
+  fr: '🇫🇷',
+  de: '🇩🇪',
+  ja: '🇯🇵',
+  zh: '🇨🇳'
+};
 
 const Navbar = () => {
   const { currentLanguage, setCurrentLanguage, t } = useLanguage();
@@ -72,21 +82,44 @@ const Navbar = () => {
           <IconButton
             onClick={handleLanguageClick}
             sx={{ ml: 2 }}
+            aria-label="Select language"
           >
-            <LanguageIcon />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LanguageIcon />
+              <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                {languageFlags[currentLanguage]} {languages[currentLanguage]}
+              </Typography>
+            </Box>
           </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleLanguageClose}
+            PaperProps={{
+              sx: {
+                maxHeight: 300,
+                width: 200,
+              },
+            }}
           >
             {Object.entries(languages).map(([code, name]) => (
               <MenuItem
                 key={code}
                 selected={currentLanguage === code}
                 onClick={() => handleLanguageSelect(code)}
+                sx={{ py: 1 }}
               >
-                {name}
+                <ListItemIcon>
+                  <Typography variant="body1">{languageFlags[code]}</Typography>
+                </ListItemIcon>
+                <ListItemText 
+                  primary={name}
+                  sx={{ 
+                    '& .MuiTypography-root': {
+                      fontWeight: currentLanguage === code ? 'bold' : 'normal'
+                    }
+                  }}
+                />
               </MenuItem>
             ))}
           </Menu>
