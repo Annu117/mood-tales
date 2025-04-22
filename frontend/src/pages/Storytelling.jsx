@@ -32,6 +32,7 @@ const Storytelling = () => {
   const [announcement, setAnnouncement] = useState('');
   const storyEndRef = useRef(null);
   const announcementRef = useRef(null);
+  const [language, setLanguage] = useState('en'); // Default to English
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   // At the top inside your component
@@ -87,7 +88,8 @@ useEffect(() => {
         body: JSON.stringify({
           theme: storyTheme,
           storyLength,
-          initialPrompt: userInput || "Tell me a story"
+          initialPrompt: userInput || "Tell me a story",
+          language: language
         }),
       });
       
@@ -141,7 +143,8 @@ useEffect(() => {
           })),
           userInput,
           storyLength,
-          theme: storyTheme
+          theme: storyTheme,
+          language: language
         }),
       });
       
@@ -282,6 +285,8 @@ useEffect(() => {
               isLoading={isLoading}
               startNewStory={startNewStory}
               handleKeyPress={handleKeyPress}
+              language={language}
+              setLanguage={setLanguage}
             />
           )}
 
@@ -310,6 +315,7 @@ useEffect(() => {
                     isUser={entry.type === 'user'}
                   />
                 ))}
+                <StoryReader storyHistory={storyHistory} />
                 <div ref={storyEndRef} tabIndex={-1} />
               </Paper>
 

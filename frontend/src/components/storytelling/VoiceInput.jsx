@@ -45,11 +45,7 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
   
     recognition.continuous = true;
     recognition.interimResults = true;
-  
-    // recognition.onstart = () => {
-    //   setIsListening(true);
-    //   setTranscript('');
-    // };
+
     recognition.onstart = () => {
       listeningRef.current = true;
       setIsListening(true);
@@ -112,7 +108,6 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
   }, [onInputReceived]);
   const tryBackendSpeechRecognition = async () => {
     try {
-      // const response = await fetch("http://localhost:5000/api/voice");
       const response = await fetch(`${API_BASE_URL}/voice`);
 
       const data = await response.json();
