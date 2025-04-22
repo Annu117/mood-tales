@@ -32,57 +32,110 @@ class RAGStoryGenerator:
 
         self.vectorstore = None
         self.retriever = None
+        self.current_theme = None
         self.setup_rag_chain()
+    
+    def update_theme(self, new_theme):
+        """Update the RAG pipeline with a new theme."""
+        self.setup_rag_chain(theme=new_theme)
 
-    def fetch_stories(self):
-        """Fetch stories from various story websites."""
-        urls = [
-            "https://www.talesofpanchatantra.com/",
-            "https://www.indiaparenting.com/stories/",
-            "https://www.templepurohit.com/vedic-vaani/hindu-mythology-stories/",
-            "https://www.kidsgen.com/fables_and_fairytales/indian_mythology_stories/",
-            "https://www.ancient-origins.net/myths-legends",  
-            "https://www.worldoftales.com/", 
-            "https://mythopedia.com/",  
-            "https://www.kidsgen.com/fables_and_fairytales/african_folk_tales/"
-        ]
-        
+
+    def fetch_stories_by_theme(self, theme):
+        """Fetch themed stories based on user selection."""
+        theme_sources = {
+            "mythology": [
+                "https://www.templepurohit.com/vedic-vaani/hindu-mythology-stories/",
+                "https://www.kidsgen.com/fables_and_fairytales/indian_mythology_stories/",
+                "https://mythopedia.com/",
+                "https://www.ancient-origins.net/myths-legends"
+            ],
+            "animal": [
+                "https://www.talesofpanchatantra.com/",
+                "https://www.kidsgen.com/fables_and_fairytales/african_folk_tales/",
+                "https://www.worldoftales.com/"
+            ],
+            "bedtime": [
+                "https://www.bedtimeshortstories.com/",
+                "https://www.shortkidstories.com/",
+                "https://www.storyberries.com/"
+            ],
+            "general": [
+                "https://www.pitara.com/fiction-for-kids/stories-for-kids/",
+                "https://americanliterature.com/childrens-stories",
+                "https://www.indiaparenting.com/stories/"
+            ]
+        }
+
+        urls = theme_sources.get(theme.lower(), theme_sources["general"])
         stories = []
+
         for url in urls:
             try:
                 response = requests.get(url, timeout=5)
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, "html.parser")
-                    extracted_stories = [story.text for story in soup.find_all("p")[:5]]
-                    stories.extend(extracted_stories)
-            except requests.exceptions.RequestException:
+                    extracted = [p.text.strip() for p in soup.find_all("p")[:5]]
+                    stories.extend(extracted)
+            except Exception as e:
+                print(f"Failed fetching {url}: {e}")
                 continue
 
-        return "\n".join(stories) if stories else "No online stories found."
+        return "\n".join(stories) if stories else "No themed stories found."
 
-    def prepare_documents(self, raw_text):
+    def prepare_documents(self, raw_text, theme):
         """Prepare documents for vector store."""
+        # splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+        # return splitter.split_documents([Document(page_content=raw_text)])
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-        return splitter.split_documents([Document(page_content=raw_text)])
+        docs = splitter.split_documents([Document(page_content=raw_text)])
 
-    def setup_rag_chain(self):
-        """Set up the RAG chain with story content."""
-        # Fetch and prepare stories
-        raw_text = self.fetch_stories()
-        docs = self.prepare_documents(raw_text)
+        # Tag documents with theme metadata
+        for doc in docs:
+            doc.metadata["theme"] = theme
+
+        return docs
+
+    def setup_rag_chain(self,  theme="general"):
+        """Set up RAG chain based on selected theme."""
         
-        # Create vector store
-        self.vectorstore = Chroma.from_documents(
-            documents=docs,
-            embedding=self.embeddings,
-            persist_directory="story_db"
-        )
-        
-        # Create retriever
+        persist_dir = f"story_db_{theme}"
+        if self.current_theme == theme:
+            return  # Already set up
+        self.current_theme = theme
+        # Try loading an existing vector store
+        if os.path.exists(persist_dir):
+            # self.vectorstore = Chroma(persist_directory=persist_dir, embedding=self.embeddings)
+            self.vectorstore = Chroma(
+                embedding_function=self.embeddings,
+                persist_directory=persist_dir
+            )
+
+            print(f"Loaded vectorstore for theme: {theme}")
+        else:
+            raw_text = self.fetch_stories_by_theme(theme)
+            docs = self.prepare_documents(raw_text, theme)
+
+            self.vectorstore = Chroma.from_documents(
+                documents=docs,
+                embedding=self.embeddings,
+                persist_directory=persist_dir
+            )
+            print(f"Created new vectorstore for theme: {theme}")
+
+        # raw_text = self.fetch_stories_by_theme(theme)
+        # docs = self.prepare_documents(raw_text, theme)
+
+        # self.vectorstore = Chroma.from_documents(
+        #     documents=docs,
+        #     embedding=self.embeddings,
+        #     persist_directory=f"story_db_{theme}"
+        # )
+
         self.retriever = self.vectorstore.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 6}
+            search_kwargs={"k": 5, "filter": {"theme": theme}}
         )
+                
         self.prompt = ChatPromptTemplate.from_template("""
             You are a creative children's storyteller who creates personalized stories based on the child's input and relevant story content.
 
@@ -104,17 +157,9 @@ class RAGStoryGenerator:
             Story segment:
             """)
 
-        # Create document chain
-        self.document_chain = create_stuff_documents_chain(
-            llm=self.llm,
-            prompt=self.prompt
-        )
+        self.document_chain = create_stuff_documents_chain(llm=self.llm, prompt=self.prompt)
+        self.chain = create_retrieval_chain(self.retriever, self.document_chain)
         
-        # Create retrieval chain
-        self.chain = create_retrieval_chain(
-            self.retriever,
-            self.document_chain
-        )
 
     def generate_story(self, user_input, story_history=None, word_count=50):
         """Generate a story segment using RAG.

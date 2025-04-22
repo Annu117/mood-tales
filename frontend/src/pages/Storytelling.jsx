@@ -15,6 +15,10 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import StorySettings from '../components/storytelling/StorySettings';
 import StorySegment from '../components/storytelling/StorySegment';
 import StoryInput from '../components/storytelling/StoryInput';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Fab, Zoom } from '@mui/material';
+import StoryReader from '../components/storytelling/StoryReader';
+
 
 const Storytelling = () => {
   const theme = useTheme();
@@ -30,6 +34,19 @@ const Storytelling = () => {
   const announcementRef = useRef(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  // At the top inside your component
+useEffect(() => {
+  const saved = localStorage.getItem('storyHistory');
+  if (saved) {
+    setStoryHistory(JSON.parse(saved));
+    setIsStarted(true);
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem('storyHistory', JSON.stringify(storyHistory));
+}, [storyHistory]);
+
 
   // Scroll to bottom when story updates
   useEffect(() => {
@@ -47,6 +64,14 @@ const Storytelling = () => {
       return () => clearTimeout(timeoutId);
     }
   }, [announcement]);
+  // useEffect(() => {
+  //   const last = storyHistory[storyHistory.length - 1];
+  //   if (last?.type === 'ai') {
+  //     const utterance = new SpeechSynthesisUtterance(last.content);
+  //     speechSynthesis.speak(utterance);
+  //   }
+  // }, [storyHistory]);
+  
 
   const startNewStory = async () => {
     setIsLoading(true);
@@ -166,6 +191,8 @@ const Storytelling = () => {
 
   return (
     <>
+    <StoryReader storyHistory={storyHistory} />
+
       {/* Skip link for keyboard navigation */}
       <Link
         href="#main-storytelling-content"
@@ -320,6 +347,21 @@ const Storytelling = () => {
             </>
           )}
         </Box>
+        <Fab
+          color="primary"
+          size="small"
+          aria-label="scroll back to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          sx={{
+            position: 'fixed',
+            bottom: 32,
+            right: 32,
+            zIndex: 999,
+            boxShadow: theme.shadows[6],
+          }}
+        >
+          <KeyboardArrowUpIcon />
+        </Fab>
 
         {/* Error notification */}
         <Snackbar 
