@@ -93,18 +93,18 @@ import SendIcon from '@mui/icons-material/Send';
 import VoiceInput from './VoiceInput';
 
 const StoryInput = ({ 
-  userInput, 
+  userInput = '', 
   setUserInput, 
   isLoading, 
   continueStory, 
   handleKeyPress
 }) => {
   const theme = useTheme();
-  const inputRef = useRef(null);
-
+  
   const handleVoiceInput = (text) => {
     setUserInput(text);
   };
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -135,7 +135,6 @@ const StoryInput = ({
         onKeyPress={handleKeyPress}
         disabled={isLoading}
         aria-label="Enter your next story input"
-        aria-describedby="story-input"
         sx={{
           '& .MuiOutlinedInput-root': {
             '&.Mui-focused fieldset': {
@@ -144,14 +143,14 @@ const StoryInput = ({
           },
         }}
       />
-
+      
       <VoiceInput onInputReceived={handleVoiceInput} disabled={isLoading} />
-
+      
       <Button 
         variant="contained" 
         color="primary"
         onClick={continueStory}
-        disabled={isLoading || !userInput.trim()}
+        disabled={isLoading || !(userInput?.trim() || '')}
         startIcon={isLoading ? null : <SendIcon />}
         sx={{ 
           borderRadius: 8, 
@@ -168,7 +167,6 @@ const StoryInput = ({
           },
         }}
         aria-label="Continue the story"
-        title="Click to continue the story"
       >
         {isLoading ? <CircularProgress size={24} /> : 'Continue'}
       </Button>
