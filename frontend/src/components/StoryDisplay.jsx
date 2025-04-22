@@ -1,7 +1,10 @@
 import React from 'react';
 import { Paper, Typography, Box, Button } from '@mui/material';
+import { useLanguage } from '../utils/LanguageContext';
 
 const StoryDisplay = ({ story, characterImage }) => {
+  const { t } = useLanguage();
+
   return (
     <Paper elevation={3} sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       <Typography variant="h4" gutterBottom>
@@ -22,7 +25,7 @@ const StoryDisplay = ({ story, characterImage }) => {
         >
           <img 
             src={characterImage} 
-            alt="Character" 
+            alt={t('Character')} 
             style={{ 
               maxWidth: '200px', 
               maxHeight: '200px',
@@ -41,8 +44,8 @@ const StoryDisplay = ({ story, characterImage }) => {
       </Box>
       
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button variant="outlined">Read Again</Button>
-        <Button variant="contained">Create New Story</Button>
+        <Button variant="outlined">{t('Read Again')}</Button>
+        <Button variant="contained">{t('Create New Story')}</Button>
       </Box>
     </Paper>
   );

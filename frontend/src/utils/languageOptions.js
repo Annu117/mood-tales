@@ -3,7 +3,9 @@ const LANGUAGES = {
     Spanish: 'es',
     French: 'fr',
     Hindi: 'hi',
-    
+    German: 'de',
+    Japanese: 'ja',
+    Chinese: 'zh'
   };
   
   export default LANGUAGES;

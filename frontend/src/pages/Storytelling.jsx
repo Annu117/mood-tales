@@ -20,9 +20,11 @@ import { Fab, Zoom } from '@mui/material';
 import StoryReader from '../components/storytelling/StoryReader';
 import VoiceControls from '../components/storytelling/VoiceControls';
 
+import { useLanguage } from '../utils/LanguageContext';
 
 const Storytelling = () => {
   const theme = useTheme();
+  const { t } = useLanguage();
   const [storyHistory, setStoryHistory] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,28 +38,25 @@ const Storytelling = () => {
   const [language, setLanguage] = useState('en'); // Default to English
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-  // At the top inside your component
-useEffect(() => {
-  const saved = localStorage.getItem('storyHistory');
-  if (saved) {
-    setStoryHistory(JSON.parse(saved));
-    setIsStarted(true);
-  }
-}, []);
 
-useEffect(() => {
-  localStorage.setItem('storyHistory', JSON.stringify(storyHistory));
-}, [storyHistory]);
+  useEffect(() => {
+    const saved = localStorage.getItem('storyHistory');
+    if (saved) {
+      setStoryHistory(JSON.parse(saved));
+      setIsStarted(true);
+    }
+  }, []);
 
+  useEffect(() => {
+    localStorage.setItem('storyHistory', JSON.stringify(storyHistory));
+  }, [storyHistory]);
 
-  // Scroll to bottom when story updates
   useEffect(() => {
     if (storyEndRef.current) {
       storyEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [storyHistory]);
 
-  // Screen reader announcements
   useEffect(() => {
     if (announcement) {
       const timeoutId = setTimeout(() => {
@@ -66,19 +65,11 @@ useEffect(() => {
       return () => clearTimeout(timeoutId);
     }
   }, [announcement]);
-  // useEffect(() => {
-  //   const last = storyHistory[storyHistory.length - 1];
-  //   if (last?.type === 'ai') {
-  //     const utterance = new SpeechSynthesisUtterance(last.content);
-  //     speechSynthesis.speak(utterance);
-  //   }
-  // }, [storyHistory]);
-  
 
   const startNewStory = async () => {
     setIsLoading(true);
     setIsStarted(true);
-    setAnnouncement('Starting a new story...');
+    setAnnouncement(t('Starting a new story...'));
     
     try {
       const response = await fetch(`${API_BASE_URL}/start-story`, {
@@ -89,7 +80,11 @@ useEffect(() => {
         body: JSON.stringify({
           theme: storyTheme,
           storyLength,
-          initialPrompt: userInput || "Tell me a story",
+
+          initialPrompt: userInput || t("Tell me a story"),
+
+//           initialPrompt: userInput || "Tell me a story",
+
           language: language
         }),
       });
@@ -102,17 +97,17 @@ useEffect(() => {
       
       setStoryHistory([{
         type: 'user',
-        content: userInput || "Tell me a story"
+        content: userInput || t("Tell me a story")
       }, {
         type: 'ai',
         content: data.storySegment
       }]);
       
-      setAnnouncement('Story started successfully');
+      setAnnouncement(t('Story started!'));
       
     } catch (error) {
       console.error('Error starting story:', error);
-      setError('Oops! Something went wrong when starting your story. Let\'s try again!');
+      setError(t('Failed to start story. Please try again.'));
     }
     
     setUserInput('');
@@ -122,14 +117,13 @@ useEffect(() => {
   const continueStory = async () => {
     if (!userInput.trim()) return;
     
-    // Add user input to history
     setStoryHistory([...storyHistory, {
       type: 'user',
       content: userInput
     }]);
     
     setIsLoading(true);
-    setAnnouncement('Continuing your story...');
+    setAnnouncement(t('Continuing your story...'));
     
     try {
       const response = await fetch(`${API_BASE_URL}/continue-story`, {
@@ -160,11 +154,11 @@ useEffect(() => {
         content: data.storySegment
       }]);
       
-      setAnnouncement('Story continued successfully');
+      setAnnouncement(t('Story continued!'));
       
     } catch (error) {
       console.error('Error continuing story:', error);
-      setError('Oops! Something went wrong. Let\'s try again!');
+      setError(t('Failed to continue story. Please try again.'));
     }
     
     setUserInput('');
@@ -187,6 +181,7 @@ useEffect(() => {
     setStoryHistory([]);
     setUserInput('');
     setError(null);
+    setAnnouncement(t('Story reset'));
   };
 
   const handleErrorClose = () => {
@@ -195,9 +190,8 @@ useEffect(() => {
 
   return (
     <>
-    <StoryReader storyHistory={storyHistory} />
+      <StoryReader storyHistory={storyHistory} />
 
-      {/* Skip link for keyboard navigation */}
       <Link
         href="#main-storytelling-content"
         sx={{
@@ -212,7 +206,6 @@ useEffect(() => {
             width: 'auto',
             height: 'auto',
             padding: '10px',
-            // background: 'white',
             zIndex: 9999,
             textDecoration: 'none',
             fontWeight: 'bold',
@@ -220,10 +213,9 @@ useEffect(() => {
           },
         }}
       >
-        Skip to main content
+        {t('Skip to main content')}
       </Link>
       
-      {/* Announcement for screen readers */}
       <div 
         aria-live="polite" 
         ref={announcementRef}
@@ -238,13 +230,10 @@ useEffect(() => {
         component="main"
       >
         <Box sx={{
-          // background: 'linear-gradient(135deg, rgba(78, 125, 233, 0.1) 0%, rgba(255, 109, 0, 0.1) 100%)',
           py: 4,
           px: { xs: 2, md: 4 },
-          // borderRadius: { xs: 2, md: 4 },
           mt: 4,
           mb: 4,
-          // boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}>
           <Typography 
             variant="h3" 
@@ -258,7 +247,7 @@ useEffect(() => {
             }}
             component="h2"
           >
-            Interactive Storytelling Adventure
+            {t('Interactive Storytelling Adventure')}
           </Typography>
           
           <Typography 
@@ -271,8 +260,7 @@ useEffect(() => {
               color: theme.palette.text.secondary 
             }}
           >
-            Create an interactive story together with AI. You provide the ideas and direction, 
-            and we'll craft an engaging tale that evolves as you participate.
+            {t('Create an interactive story together with AI. You provide the ideas and direction, and we\'ll craft an engaging tale that evolves as you participate.')}
           </Typography>
 
           {!isStarted && (
@@ -305,7 +293,7 @@ useEffect(() => {
                   border: '1px solid rgba(0,0,0,0.08)',
                 }}
                 role="log"
-                aria-label="Story conversation"
+                aria-label={t('Story conversation')}
                 aria-live="polite"
                 tabIndex={0}
               >
@@ -348,9 +336,9 @@ useEffect(() => {
                       outline: '3px solid rgba(255, 109, 0, 0.5)',
                     },
                   }}
-                  aria-label="Start a new story"
+                  aria-label={t('Start a new story')}
                 >
-                  Start New Story
+                  {t('Start New Story')}
                 </Button>
               </Box>
             </>
@@ -359,7 +347,7 @@ useEffect(() => {
         <Fab
           color="primary"
           size="small"
-          aria-label="scroll back to top"
+          aria-label={t('scroll back to top')}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           sx={{
             position: 'fixed',
@@ -372,7 +360,6 @@ useEffect(() => {
           <KeyboardArrowUpIcon />
         </Fab>
 
-        {/* Error notification */}
         <Snackbar 
           open={!!error} 
           autoHideDuration={6000} 
@@ -385,7 +372,7 @@ useEffect(() => {
             sx={{ width: '100%' }}
             variant="filled"
           >
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>{t('Error')}</AlertTitle>
             {error}
           </Alert>
         </Snackbar>
