@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { Button, Box, Typography } from '@mui/material';
 import PreferencesPanel from '../components/PreferencesPanel';
 import { generateStory } from '../utils/storyGeneration';
+import { useLanguage } from '../utils/LanguageContext';
 
 const Story = () => {
+  const { t } = useLanguage();
   const [age, setAge] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -16,14 +19,14 @@ const Story = () => {
     const storyData = {
       characters: [{
         name: characterName,
-        description: `a curious child aged ${age}`,
-        features: { colorDescription: 'bright and cheerful colors' }
+        description: `${t('a curious child aged')} ${age}`,
+        features: { colorDescription: t('bright and cheerful colors') }
       }],
       scenes: [{
         id: 'scene1',
         label: selectedGenre,
         keywords: favGenres.split(',').map(g => g.trim()),
-        features: { colorDescription: 'magical and colorful landscape' }
+        features: { colorDescription: t('magical and colorful landscape') }
       }]
     };
 
@@ -32,7 +35,7 @@ const Story = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <Box sx={{ p: 3 }}>
       <PreferencesPanel
         age={age}
         setAge={setAge}
@@ -49,16 +52,26 @@ const Story = () => {
         characterName={characterName}
         setCharacterName={setCharacterName}
       />
-      <button onClick={handleGenerateStory} style={{ marginTop: 20 }}>Generate Story</button>
-      <div style={{ marginTop: 30 }}>
+      <Button 
+        variant="contained" 
+        onClick={handleGenerateStory} 
+        sx={{ mt: 3 }}
+      >
+        {t('Generate Story')}
+      </Button>
+      <Box sx={{ mt: 4 }}>
         {story.map((section, index) => (
-          <div key={index}>
-            <h3>{section.title}</h3>
-            <p>{section.content}</p>
-          </div>
+          <Box key={index} sx={{ mb: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              {section.title}
+            </Typography>
+            <Typography variant="body1">
+              {section.content}
+            </Typography>
+          </Box>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

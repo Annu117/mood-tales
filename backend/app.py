@@ -7,7 +7,7 @@ import time
 import json
 import spacy
 import requests
-import openai
+# import openai
 from deep_translator import GoogleTranslator
 from transformers import pipeline
 from bs4 import BeautifulSoup
@@ -64,7 +64,7 @@ GLOBAL_MYTHOLOGY = {
     "sun wukong": "Chinese Monkey King, central figure in Journey to the West",
     "quetzalcoatl": "Aztec feathered serpent god of wisdom",
 }
-openai.api_key = os.getenv("OPENAI_API_KEY")
+#openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/api/voice", methods=["GET"])
 def voice_input():
@@ -115,44 +115,44 @@ def fetch_stories():
 
     return "\n".join(stories) if stories else "No online stories found."
 
-def get_retrieved_story(query, emotion, entity_info, cultural_context, online_stories, story_context, user_preferences):
-    """Generate a story based on user input and context."""
+# def get_retrieved_story(query, emotion, entity_info, cultural_context, online_stories, story_context, user_preferences):
+#     """Generate a story based on user input and context."""
     
-    # Extract user preferences
-    age = user_preferences.get("age", "young")
-    genre = user_preferences.get("genre", "Adventure")
-    character_name = user_preferences.get("character_name", "")
-    use_mythology = user_preferences.get("use_mythology", False)
-    use_cultural_context = user_preferences.get("use_cultural_context", False)
+#     # Extract user preferences
+#     age = user_preferences.get("age", "young")
+#     genre = user_preferences.get("genre", "Adventure")
+#     character_name = user_preferences.get("character_name", "")
+#     use_mythology = user_preferences.get("use_mythology", False)
+#     use_cultural_context = user_preferences.get("use_cultural_context", False)
     
-    # System prompt
-    system_prompt = (
-        f"You are an interactive storytelling AI for children. "
-        f"Your goal is to create deeply engaging and personalized stories or continue an ongoing story, ensuring coherence, personalization and adaptation to the child's detected emotion ({emotion}). The child is {age} years old and enjoys {genre} stories. "
-        f"Maintain narrative flow, incorporating past user inputs from the story context. "
-        f"If mythology or historical characters are detected ({entity_info}), use them accurately while keeping the story engaging. "
-        f"Allow the child to guide the story, adapting to follow-up questions or modifications based on their previous inputs. "
-        f"Ensure emotional depth and consistency throughout the story experience. "
-        f"Use mythology: {'Yes' if use_mythology else 'No'}. "
-        f"If a character is provided ({character_name}), integrate them as a main figure. "
-        f"Include cultural context: {'Yes' if use_cultural_context else 'No'}. "
-        f"\n\nCurrent story context:\n{story_context}\n\n"
-        f"User input:\n{query}\n\n"
-        f"Additional relevant story elements:\n{online_stories}"
-    )
+#     # System prompt
+#     system_prompt = (
+#         f"You are an interactive storytelling AI for children. "
+#         f"Your goal is to create deeply engaging and personalized stories or continue an ongoing story, ensuring coherence, personalization and adaptation to the child's detected emotion ({emotion}). The child is {age} years old and enjoys {genre} stories. "
+#         f"Maintain narrative flow, incorporating past user inputs from the story context. "
+#         f"If mythology or historical characters are detected ({entity_info}), use them accurately while keeping the story engaging. "
+#         f"Allow the child to guide the story, adapting to follow-up questions or modifications based on their previous inputs. "
+#         f"Ensure emotional depth and consistency throughout the story experience. "
+#         f"Use mythology: {'Yes' if use_mythology else 'No'}. "
+#         f"If a character is provided ({character_name}), integrate them as a main figure. "
+#         f"Include cultural context: {'Yes' if use_cultural_context else 'No'}. "
+#         f"\n\nCurrent story context:\n{story_context}\n\n"
+#         f"User input:\n{query}\n\n"
+#         f"Additional relevant story elements:\n{online_stories}"
+#     )
 
-    # Call OpenAI API for story generation
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Use appropriate model based on your requirements
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query}
-        ],
-        max_tokens=250,
-        temperature=0.7
-    )
+#     # Call OpenAI API for story generation
+#     response = openai.ChatCompletion.create(
+#         model="gpt-4",  # Use appropriate model based on your requirements
+#         messages=[
+#             {"role": "system", "content": system_prompt},
+#             {"role": "user", "content": query}
+#         ],
+#         max_tokens=250,
+#         temperature=0.7
+#     )
     
-    return response.choices[0].message['content']
+#     return response.choices[0].message['content']
 
 @app.route('/api/story', methods=['POST'])
 def generate_story():

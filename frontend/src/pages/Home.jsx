@@ -13,9 +13,11 @@ import { Link as RouterLink } from 'react-router-dom';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import CreateIcon from '@mui/icons-material/Create';
+import { useLanguage } from '../utils/LanguageContext';
 
 const Home = () => {
   const theme = useTheme();
+  const { t } = useLanguage();
 
   return (
     <Box component="main">
@@ -42,7 +44,7 @@ const Home = () => {
           },
         }}
       >
-        Skip to main content
+        {t('Skip to main content')}
       </Link>
 
       {/* Hero Section */}
@@ -66,10 +68,10 @@ const Home = () => {
                 sx={{ fontWeight: 700 }}
                 id="hero-title"
               >
-                Meet StoryPals: Your Emotion-Aware Storyteller
+                {t('Meet StoryPals: Your Emotion-Aware Storyteller')}
               </Typography>
               <Typography variant="h6" sx={{ mb: 4, opacity: 0.95 }}>
-                Tell your mood, draw your characters, and let AI spin magical stories for you!
+                {t('Tell your mood, draw your characters, and let AI spin magical stories for you!')}
               </Typography>
  
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -79,7 +81,7 @@ const Home = () => {
                   size="large"
                   component={RouterLink}
                   to="/story"
-                  aria-label="Start with preferences"
+                  aria-label={t('Start with preferences')}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -95,7 +97,7 @@ const Home = () => {
                     },
                   }}
                 >
-                  Start with Preferences
+                  {t('Start with Preferences')}
                 </Button>
 
                 <Button
@@ -105,7 +107,7 @@ const Home = () => {
                   component={RouterLink}
                   to="/create"
                   startIcon={<CreateIcon />}
-                  aria-label="Create a story"
+                  aria-label={t('Create a Story')}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -122,7 +124,7 @@ const Home = () => {
                     },
                   }}
                 >
-                  Create a Story
+                  {t('Create a Story')}
                 </Button>
               </Box>
             </Grid>
@@ -130,7 +132,7 @@ const Home = () => {
               <Box
                 component="img"
                 src="/api/placeholder/500/400"
-                alt="Kid interacting with AI storytelling app"
+                alt={t('Kid interacting with AI storytelling app')}
                 sx={{
                   width: '100%',
                   borderRadius: 6,
@@ -157,7 +159,7 @@ const Home = () => {
           gutterBottom
           id="how-it-works-title" 
         >
-          How StoryPals Works
+          {t('How StoryPals Works')}
         </Typography>
         <Typography
           variant="h6"
@@ -165,25 +167,25 @@ const Home = () => {
           color="text.secondary"
           sx={{ mb: 6 }}
         >
-          Just 3 simple steps to create your own emotion-based story!
+          {t('Just 3 simple steps to create your own emotion-based story!')}
         </Typography>
 
         <Grid container spacing={6}>
           {[
             {
               icon: <PsychologyIcon sx={{ fontSize: 60 }} aria-hidden="true" />,
-              title: 'Share Your Mood',
-              text: 'Choose how you\'re feeling today – happy, sad, excited, or more!',
+              title: t('Share Your Mood'),
+              text: t('Choose how you\'re feeling today – happy, sad, excited, or more!'),
             },
             {
               icon: <CreateIcon sx={{ fontSize: 60 }} aria-hidden="true" />,
-              title: 'Draw or Describe a Character',
-              text: 'Use drawing tools or describe your character in words.',
+              title: t('Draw or Describe a Character'),
+              text: t('Use drawing tools or describe your character in words.'),
             },
             {
               icon: <AutoStoriesIcon sx={{ fontSize: 60 }} aria-hidden="true" />,
-              title: 'Get Your Personalized Story',
-              text: 'AI combines your mood and character to generate a magical tale.',
+              title: t('Get Your Personalized Story'),
+              text: t('AI combines your mood and character to generate a magical tale.'),
             },
           ].map((step, i) => (
             <Grid key={i} item xs={12} md={4}>
@@ -198,7 +200,7 @@ const Home = () => {
                     transform: 'translateY(-6px)',
                     boxShadow: theme.shadows[6],
                   },
-                  height: '100%', // Ensure equal height
+                  height: '100%',
                 }}
               >
                 <Box color="primary.main" mb={2}>
@@ -222,7 +224,7 @@ const Home = () => {
             size="large"
             component={RouterLink}
             to="/create"
-            aria-label="Start your story adventure"
+            aria-label={t('Start your story adventure')}
             sx={{
               px: 5,
               py: 1.5,
@@ -238,7 +240,7 @@ const Home = () => {
               },
             }}
           >
-            Start Your Story Adventure
+            {t('Start Your Story Adventure')}
           </Button>
         </Box>
       </Container>

@@ -20,12 +20,10 @@ import {
 import DrawingCanvas from '../components/DrawingCanvas';
 import StoryDisplay from '../components/StoryDisplay';
 import { analyzeCharacter, generateStory } from '../services/api';
-
-const steps = ['Draw Character', 'Character Analysis', 'Read Your Story'];
-
-const emotionOptions = ['happy', 'sad', 'angry', 'surprised', 'scared', 'excited'];
+import { useLanguage } from '../utils/LanguageContext';
 
 const CreateStory = () => {
+  const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const [characterImage, setCharacterImage] = useState(null);
   const [characterAnalysis, setCharacterAnalysis] = useState(null);
@@ -33,6 +31,21 @@ const CreateStory = () => {
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const steps = [
+    t('Draw Character'),
+    t('Character Analysis'),
+    t('Read Your Story')
+  ];
+
+  const emotionOptions = [
+    t('happy'),
+    t('sad'),
+    t('angry'),
+    t('surprised'),
+    t('scared'),
+    t('excited')
+  ];
 
   const handleSaveDrawing = async (imageData) => {
     setCharacterImage(imageData);
@@ -50,7 +63,7 @@ const CreateStory = () => {
       });
       setActiveStep(1);
     } catch (err) {
-      setError("Oops! We had trouble analyzing your character. Please try again.");
+      setError(t("Oops! We had trouble analyzing your character. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -65,7 +78,7 @@ const CreateStory = () => {
       setStory(generatedStory);
       setActiveStep(2);
     } catch (err) {
-      setError("Failed to generate story. Please try again.");
+      setError(t("Failed to generate story. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -76,22 +89,22 @@ const CreateStory = () => {
 
     return (
       <Paper elevation={3} sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
-        <Typography variant="h6" gutterBottom>Here's what I saw in your drawing:</Typography>
+        <Typography variant="h6" gutterBottom>{t("Here's what I saw in your drawing:")}</Typography>
         <Typography variant="body2" paragraph>
-          "{characterAnalysis.raw_caption}" (captioned by AI)<br />
-          Categories: {characterAnalysis.raw_classification.map((c) => c.label).join(', ')}
+          "{characterAnalysis.raw_caption}" ({t("captioned by AI")})<br />
+          {t("Categories:")} {characterAnalysis.raw_classification.map((c) => c.label).join(', ')}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
             <img 
               src={characterImage} 
-              alt="Your character" 
+              alt={t("Your character")} 
               style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} 
             />
           </Grid>
           <Grid item xs={12} md={8}>
             <TextField
-              label="Name"
+              label={t("Name")}
               fullWidth
               margin="normal"
               value={editableAnalysis.name}
@@ -99,7 +112,7 @@ const CreateStory = () => {
             />
 
             <TextField
-              label="Description"
+              label={t("Description")}
               fullWidth
               multiline
               rows={3}
@@ -110,7 +123,7 @@ const CreateStory = () => {
 
             <TextField
               select
-              label="Emotion"
+              label={t("Emotion")}
               fullWidth
               margin="normal"
               value={editableAnalysis.emotion}
@@ -121,21 +134,21 @@ const CreateStory = () => {
               ))}
             </TextField>
 
-            <Typography variant="subtitle1" gutterBottom>Colors Detected:</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t("Colors Detected:")}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
               {characterAnalysis.colors.map((color, index) => (
                 <Chip key={index} label={color} size="small" />
               ))}
             </Box>
 
-            <Typography variant="subtitle1" gutterBottom>Features:</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t("Features:")}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
               {characterAnalysis.features.map((feature, index) => (
                 <Chip key={index} label={feature} size="small" />
               ))}
             </Box>
 
-            <Typography variant="subtitle1" gutterBottom>Personality Traits:</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t("Personality Traits:")}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
               {editableAnalysis.characteristics.map((trait, index) => (
                 <Chip key={index} label={trait} size="small" color="primary" />
@@ -143,7 +156,7 @@ const CreateStory = () => {
             </Box>
 
             <Button variant="contained" onClick={handleGenerateStory} disabled={loading}>
-              Generate Story with {editableAnalysis.name}
+              {t("Generate Story with")} {editableAnalysis.name}
             </Button>
           </Grid>
         </Grid>
@@ -166,7 +179,7 @@ const CreateStory = () => {
       {loading && (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
           <CircularProgress size={60} />
-          <Box sx={{ mt: 2 }}>{activeStep === 0 ? 'Analyzing your character...' : 'Creating a unique story...'}</Box>
+          <Box sx={{ mt: 2 }}>{activeStep === 0 ? t("Analyzing your character...") : t("Creating a unique story...")}</Box>
         </Box>
       )}
 
