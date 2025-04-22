@@ -8,7 +8,9 @@ const StoryReader = ({ storyHistory }) => {
 
   return (
     <div style={{ marginTop: '10px' }}>
-      {lastStoryContent && <VoiceControls text={lastStoryContent} />}
+      {/* {lastStoryContent && <VoiceControls text={lastStoryContent} />} */}
+      {lastStoryContent && <VoiceControls storyHistory={[{ type: 'ai', content: lastStoryContent }]} language="hi" />}
+
     </div>
   );
 };
