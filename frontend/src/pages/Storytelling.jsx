@@ -21,6 +21,7 @@ import StoryReader from '../components/storytelling/StoryReader';
 import VoiceControls from '../components/storytelling/VoiceControls';
 import DrawingCanvas from '../components/DrawingCanvas';
 import { useLanguage } from '../utils/LanguageContext';
+import StoryExplanation from '../components/storytelling/StoryExplanation';
 
 const Storytelling = () => {
   const theme = useTheme();
@@ -38,6 +39,8 @@ const Storytelling = () => {
   const announcementRef = useRef(null);
   const [language, setLanguage] = useState('en'); // Default to English
   const [drawingAnalysis, setDrawingAnalysis] = useState(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [currentExplanation, setCurrentExplanation] = useState(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -237,6 +240,15 @@ const Storytelling = () => {
     }
   };
 
+  const handleStoryResponse = (response) => {
+    setStoryHistory(prev => [...prev, {
+      type: 'ai',
+      content: response.story
+    }]);
+    setCurrentExplanation(response.explanation);
+    setShowExplanation(true);
+  };
+
   return (
     <>
       <StoryReader storyHistory={storyHistory} />
@@ -434,6 +446,13 @@ const Storytelling = () => {
           </Alert>
         </Snackbar>
       </Container>
+
+      {showExplanation && (
+        <StoryExplanation
+          explanation={currentExplanation}
+          onClose={() => setShowExplanation(false)}
+        />
+      )}
     </>
   );
 };
