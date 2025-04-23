@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = os.getenv("IMAGE_GENERATION_API_URL", "https://b851-34-142-146-22.ngrok-free.app/generate")
+API_URL = os.getenv("IMAGE_GENERATION_API_URL", "https://a17e-34-125-251-100.ngrok-free.app/generate")
 
 async def generate_story_image(story_content, scene_description=None):
     """Generate an image based on story content or scene description."""
