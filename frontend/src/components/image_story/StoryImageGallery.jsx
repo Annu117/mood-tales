@@ -19,7 +19,7 @@ const StoryImageGallery = ({ images, sectionIndex, downloadImage }) => {
             <Paper 
               elevation={2} 
               sx={{ 
-                p: 1, 
+                p: 3, 
                 height: '100%', 
                 position: 'relative',
                 borderRadius: 2,

@@ -85,7 +85,7 @@ export const continueStory = async (params) => {
  * Creates a prompt for the language model based on story data
  */
 const createStoryPrompt = (storyData) => {
-  let prompt = "Generate a children's story with the following elements:\n\n";
+  let prompt = "Generate a story appropriate for a listener aged " + storyData.age + " with the following elements:\n\n";
   
   // Add character descriptions
   if (storyData.characters.length > 0) {
@@ -108,15 +108,98 @@ const createStoryPrompt = (storyData) => {
   
   // Add preferences
   prompt += "\nPreferences:\n";
-  prompt += `- Age: ${storyData.age}\n`;
+  prompt += `- Listener's Age: ${storyData.age}\n`;
   prompt += `- Genre: ${storyData.selectedGenre}\n`;
   prompt += `- Language: ${storyData.selectedLanguage}\n`;
   prompt += `- Use Cultural Context: ${storyData.useCulturalContext}\n`;
   prompt += `- Use Mythology: ${storyData.useMythology}\n`;
   prompt += `- Favorite Genres: ${storyData.favGenres}\n`;
   
-  prompt += "\nThe story should be appropriate for young children, positive, ";
-  prompt += "and include specific references to the visual characteristics of the characters and settings. ";
+  // Add special needs accommodations if specified
+  if (storyData.specialNeeds && storyData.specialNeeds.length > 0) {
+    prompt += "\nSpecial Needs Accommodations:\n";
+    
+    // Handle predefined special needs
+    storyData.specialNeeds.forEach(need => {
+      if (!need.startsWith('custom_')) {
+        switch (need) {
+          case 'dyslexia':
+            prompt += "- Use clear, simple fonts and spacing\n";
+            prompt += "- Avoid complex sentence structures\n";
+            prompt += "- Include visual aids and illustrations\n";
+            break;
+          case 'adhd':
+            prompt += "- Keep paragraphs short and engaging\n";
+            prompt += "- Include interactive elements\n";
+            prompt += "- Use clear transitions between scenes\n";
+            break;
+          case 'autism':
+            prompt += "- Use clear, literal language\n";
+            prompt += "- Avoid idioms and metaphors\n";
+            prompt += "- Include predictable patterns\n";
+            break;
+          case 'visual_impairment':
+            prompt += "- Focus on auditory and tactile descriptions\n";
+            prompt += "- Use rich sensory details\n";
+            prompt += "- Avoid visual-only references\n";
+            break;
+          case 'hearing_impairment':
+            prompt += "- Focus on visual descriptions\n";
+            prompt += "- Include visual cues for sounds\n";
+            prompt += "- Use clear visual storytelling\n";
+            break;
+          case 'anxiety':
+            prompt += "- Use calming and positive themes\n";
+            prompt += "- Avoid sudden surprises or conflicts\n";
+            prompt += "- Include reassuring elements\n";
+            break;
+          case 'cognitive_delay':
+            prompt += "- Use simple, clear language\n";
+            prompt += "- Include repetitive patterns\n";
+            prompt += "- Focus on basic concepts\n";
+            break;
+        }
+      }
+    });
+
+    // Handle custom special needs
+    const customNeeds = storyData.specialNeeds.filter(need => need.startsWith('custom_'));
+    if (customNeeds.length > 0) {
+      prompt += "\nCustom Special Needs:\n";
+      customNeeds.forEach(need => {
+        const customNeed = need.replace('custom_', '');
+        prompt += `- Accommodate for: ${customNeed}\n`;
+        prompt += `- Adjust story format and content accordingly\n`;
+        prompt += `- Ensure accessibility and understanding\n`;
+      });
+    }
+  }
+  
+  // Add age-appropriate content guidelines
+  prompt += "\nThe story should be:\n";
+  if (storyData.age < 6) {
+    prompt += "- Simple and easy to understand\n";
+    prompt += "- Use basic vocabulary and short sentences\n";
+    prompt += "- Include repetitive patterns and rhymes\n";
+    prompt += "- Focus on basic concepts and emotions\n";
+  } else if (storyData.age < 9) {
+    prompt += "- Use age-appropriate vocabulary\n";
+    prompt += "- Include simple moral lessons\n";
+    prompt += "- Have clear character motivations\n";
+    prompt += "- Include some educational elements\n";
+  } else if (storyData.age < 13) {
+    prompt += "- Use more sophisticated vocabulary\n";
+    prompt += "- Include deeper character development\n";
+    prompt += "- Have more complex plot elements\n";
+    prompt += "- Include age-relevant themes\n";
+  } else {
+    prompt += "- Use mature vocabulary and themes\n";
+    prompt += "- Include complex character development\n";
+    prompt += "- Have sophisticated plot elements\n";
+    prompt += "- Address relevant life experiences\n";
+  }
+  
+  prompt += "\nThe story should be engaging, positive, and include specific references to the visual characteristics of the characters and settings. ";
   prompt += "Divide the story into a beginning, middle, and end. Each section should be about 2-3 paragraphs.";
   
   return prompt;

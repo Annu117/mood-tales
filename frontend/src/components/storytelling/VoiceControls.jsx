@@ -5,6 +5,8 @@ import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 const VoiceControls = ({ storyHistory = [], language = 'en' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -74,7 +76,7 @@ const VoiceControls = ({ storyHistory = [], language = 'en' }) => {
       const langCode = languageCodes[language]?.gtts || 'en';
       console.log('Using language code:', langCode);
 
-      const response = await fetch('http://localhost:5000/api/text-to-speech', {
+      const response = await fetch(`${API_BASE_URL}/api/text-to-speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,6 +146,13 @@ const VoiceControls = ({ storyHistory = [], language = 'en' }) => {
 
     utterance.onresume = () => {
       setIsPlaying(true);
+      setIsPaused(false);
+    };
+
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      setError('Error with browser voice. Please try again.');
+      setIsPlaying(false);
       setIsPaused(false);
     };
 

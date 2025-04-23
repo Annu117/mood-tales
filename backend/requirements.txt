@@ -19,6 +19,7 @@ beautifulsoup4
 deep_translator
 transformers
 spacy
+scikit-learn
 
 chromadb
 tiktoken

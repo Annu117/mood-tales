@@ -117,8 +117,8 @@ const CreateStory = () => {
       <Paper elevation={3} sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
         <Typography variant="h6" gutterBottom>{t("Here's what I saw in your drawing:")}</Typography>
         <Typography variant="body2" paragraph>
-          "{characterAnalysis.raw_caption}" ({t("captioned by AI")})<br />
-          {t("Categories:")} {characterAnalysis.raw_classification.map((c) => c.label).join(', ')}
+          "{characterAnalysis.description}" ({t("captioned by AI")})<br />
+          {t("Categories:")} {characterAnalysis.raw_analysis?.classifications?.map((c) => c.label).join(', ') || t("No categories detected")}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -162,22 +162,38 @@ const CreateStory = () => {
 
             <Typography variant="subtitle1" gutterBottom>{t("Colors Detected:")}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              {characterAnalysis.colors.map((color, index) => (
+              {characterAnalysis.colors?.map((color, index) => (
                 <Chip key={index} label={color} size="small" />
-              ))}
+              )) || <Typography variant="body2">{t("No colors detected")}</Typography>}
             </Box>
 
             <Typography variant="subtitle1" gutterBottom>{t("Features:")}</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              {characterAnalysis.features.map((feature, index) => (
+              {characterAnalysis.features?.map((feature, index) => (
                 <Chip key={index} label={feature} size="small" />
-              ))}
+              )) || <Typography variant="body2">{t("No features detected")}</Typography>}
             </Box>
 
-            <Typography variant="subtitle1" gutterBottom>{t("Personality Traits:")}</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              {editableAnalysis.characteristics.map((trait, index) => (
-                <Chip key={index} label={trait} size="small" color="primary" />
+            <Typography variant="subtitle1" gutterBottom>{t("AI Analysis:")}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+              {characterAnalysis.explanation?.map((item, index) => (
+                <Box key={index}>
+                  <Typography variant="subtitle2">{item.aspect}</Typography>
+                  <Typography variant="body2">{item.text}</Typography>
+                  {item.details && (
+                    <Box sx={{ pl: 2 }}>
+                      {item.details.map((detail, idx) => (
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2">{detail.label}</Typography>
+                          <Chip label={detail.score} size="small" color="info" />
+                          <Typography variant="body2" color="text.secondary">
+                            {detail.explanation}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
               ))}
             </Box>
 

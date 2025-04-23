@@ -73,10 +73,20 @@ GLOBAL_MYTHOLOGY = {
 }
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
-@app.route("/api/voice", methods=["GET"])
+@app.route("/api/voice", methods=["POST"])
 def voice_input():
-    result = recognize_speech()
-    return jsonify(result)
+    try:
+        data = request.json
+        language = data.get('language', 'en')
+        
+        result = recognize_speech(language)
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error in voice input: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 def detect_emotion(text):
     """Enhanced sentiment analysis using a deep learning model."""

@@ -130,7 +130,7 @@ const StorySettings = ({
           disabled={isLoading}
         />
         
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
           <TextField
             fullWidth
             id="story-prompt"
@@ -145,7 +145,9 @@ const StorySettings = ({
             sx={{ mr: 1 }}
             aria-label="Story prompt input"
           />
-          <VoiceInput onInputReceived={handleVoiceInput} disabled={isLoading} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <VoiceInput onInputReceived={handleVoiceInput} disabled={isLoading} />
+          </Box>
         </Box>
         
         <Button 

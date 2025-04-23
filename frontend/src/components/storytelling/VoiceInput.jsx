@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   IconButton,
@@ -18,13 +16,12 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-const VoiceInput = ({ onInputReceived, disabled = false }) => {
+const VoiceInput = ({ onInputReceived, disabled = false, language = 'en' }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState(null);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [useBackend, setUseBackend] = useState(true); // try backend first
-
 
   const recognitionRef = useRef(null);
   const listeningRef = useRef(false);
@@ -45,11 +42,13 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
   
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.lang = language; // Set the language
 
     recognition.onstart = () => {
       listeningRef.current = true;
       setIsListening(true);
       setTranscript('');
+      setError(null);
     };
   
     recognition.onresult = (event) => {
@@ -81,20 +80,6 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
       setIsListening(false);
     };
   
-    // recognition.onend = () => {
-    //   setIsListening(false);
-  
-    //   if (recognitionRef.current && isListening) {
-    //     recognitionRef.current.start(); // Auto-restart
-    //   }
-    // };
-    // recognition.onend = () => {
-    //   setIsListening(false);
-    
-    //   if (recognitionRef.current && listeningRef.current) {
-    //     recognitionRef.current.start(); // Auto-restart
-    //   }
-    // };
     recognition.onend = () => {
       listeningRef.current = false;
       setIsListening(false);
@@ -104,44 +89,43 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
       recognition.abort();
     };
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onInputReceived]);
+  }, [onInputReceived, language]);
+
   const tryBackendSpeechRecognition = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/voice`);
+      const response = await fetch(`${API_BASE_URL}/api/voice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          language: language
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Backend voice recognition failed');
+      }
 
       const data = await response.json();
   
       if (data.success) {
-        onInputReceived(data.transcript);
-        setTranscript(data.transcript);
+        // Use translated text if available, otherwise use original transcript
+        const textToUse = data.translated || data.transcript;
+        onInputReceived(textToUse);
+        setTranscript(textToUse);
       } else {
         console.warn("Backend failed:", data.error);
+        setError(data.error);
         setUseBackend(false); // fallback to browser
       }
     } catch (err) {
       console.error("Backend unavailable:", err);
-      setUseBackend(false); // fallback
+      setError('Failed to connect to voice recognition service. Switching to browser mode.');
+      setUseBackend(false); // fallback to browser
     }
   };
-  
 
-  // const toggleListening = () => {
-  //   const recognition = recognitionRef.current;
-  //   if (!recognition) return;
-  
-  //   if (!listeningRef.current) {
-  //     try {
-  //       recognition.start();
-  //       setIsListening(true);
-  //     } catch (err) {
-  //       console.error('Speech recognition error:', err);
-  //     }
-  //   } else {
-  //     recognition.stop();
-  //     setIsListening(false);
-  //   }
-  // };
   const toggleListening = () => {
     if (useBackend) {
       tryBackendSpeechRecognition();
@@ -156,13 +140,12 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
           recognition.start();
         } catch (err) {
           console.error('Speech recognition error:', err);
+          setError('Failed to start voice recognition. Please try again.');
         }
       }
     }
   };
-  
-  
-  
+
   const handleClosePermissionDialog = () => {
     setShowPermissionDialog(false);
   };
@@ -214,11 +197,16 @@ const VoiceInput = ({ onInputReceived, disabled = false }) => {
             )}
           </IconButton>
           <Box sx={{ mt: 1 }}>
-            <Button onClick={() => setUseBackend(prev => !prev)}>
+            <Button 
+              onClick={() => {
+                setUseBackend(prev => !prev);
+                setError(null);
+              }}
+              size="small"
+            >
               Switch to {useBackend ? "Browser" : "Server"} Mode
             </Button>
           </Box>
-
         </span>
       </Tooltip>
 

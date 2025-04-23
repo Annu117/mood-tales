@@ -2,10 +2,15 @@ import React from 'react';
 import { Box, TextField, Button, Typography, CircularProgress, useTheme } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { useLanguage } from '../../utils/LanguageContext';
+import VoiceInput from '../storytelling/VoiceInput';
 
 const StoryContinuation = ({ userInput, setUserInput, handleContinueStory, isContinuing }) => {
   const theme = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const handleVoiceInput = (text) => {
+    setUserInput(text);
+  };
 
   return (
     <Box 
@@ -65,30 +70,37 @@ const StoryContinuation = ({ userInput, setUserInput, handleContinueStory, isCon
             }
           }}
         />
-        <Button
-          type="submit"
-          variant="contained"
-          color="secondary"
-          endIcon={<SendIcon />}
-          onClick={handleContinueStory}
-          disabled={!userInput.trim() || isContinuing}
-          aria-label={t('Submit your continuation idea')}
-          sx={{
-            borderRadius: '999px',
-            px: 3,
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-              boxShadow: theme.shadows[4],
-            },
-          }}
-        >
-          {isContinuing ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            t('Continue')
-          )}
-        </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <VoiceInput 
+            onInputReceived={handleVoiceInput} 
+            disabled={isContinuing}
+            language={language}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="secondary"
+            endIcon={<SendIcon />}
+            onClick={handleContinueStory}
+            disabled={!userInput.trim() || isContinuing}
+            aria-label={t('Submit your continuation idea')}
+            sx={{
+              borderRadius: '999px',
+              px: 3,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            {isContinuing ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              t('Continue')
+            )}
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

@@ -18,6 +18,7 @@ const Story = () => {
   const [characterName, setCharacterName] = useState('');
   const [useCulturalContext, setUseCulturalContext] = useState(true);
   const [useMythology, setUseMythology] = useState(false);
+  const [specialNeeds, setSpecialNeeds] = useState([]);
   const [story, setStory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,7 +38,7 @@ const Story = () => {
       const storyData = {
         characters: [{
           name: characterName,
-          description: `${t('a curious child aged')} ${age}`,
+          description: t('a character in the story'),
           features: { colorDescription: t('bright and cheerful colors') }
         }],
         scenes: [{
@@ -52,7 +53,8 @@ const Story = () => {
         favGenres,
         characterName,
         useCulturalContext,
-        useMythology
+        useMythology,
+        specialNeeds
       };
 
       const generated = await generateStory(storyData);
@@ -156,6 +158,8 @@ const Story = () => {
           setUseCulturalContext={setUseCulturalContext}
           useMythology={useMythology}
           setUseMythology={setUseMythology}
+          specialNeeds={specialNeeds}
+          setSpecialNeeds={setSpecialNeeds}
           handleGenerateStory={handleGenerateStory}
           isLoading={isLoading}
         />
