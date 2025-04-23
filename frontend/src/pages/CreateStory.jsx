@@ -1,5 +1,5 @@
 // CreateStory.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Stepper, 
@@ -15,12 +15,16 @@ import {
   Button,
   Grid,
   TextField,
-  MenuItem
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import DrawingCanvas from '../components/DrawingCanvas';
 import StoryDisplay from '../components/StoryDisplay';
 import { analyzeCharacter, generateStory } from '../services/api';
 import { useLanguage } from '../utils/LanguageContext';
+import TranslatedText from '../components/common/TranslatedText';
+import { StoryInput } from '../components/StoryInput';
 
 const CreateStory = () => {
   const { t } = useLanguage();
@@ -32,11 +36,12 @@ const CreateStory = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [storyData, setStoryData] = useState({});
 
   const steps = [
-    t('Draw Character'),
-    t('Character Analysis'),
-    t('Read Your Story')
+    <TranslatedText text="Draw Character" />,
+    <TranslatedText text="Add Details" />,
+    <TranslatedText text="Generate Story" />
   ];
 
   const emotionOptions = [
@@ -63,6 +68,7 @@ const CreateStory = () => {
         emotion: analysis.emotion,
         characteristics: analysis.characteristics
       });
+      setStoryData({ ...storyData, drawing: imageData });
       setActiveStep(1);
     } catch (err) {
       setError(t("Oops! We had trouble analyzing your character. Please try again."));
@@ -94,6 +100,14 @@ const CreateStory = () => {
   const handleCancelDrawing = () => {
     setIsDrawing(false);
     setCharacterImage(null);
+  };
+
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
   };
 
   const renderCharacterAnalysis = () => {
@@ -177,53 +191,75 @@ const CreateStory = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+    <Container maxWidth="lg">
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          <TranslatedText text="Create New Story" />
+        </Typography>
+        
+        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-      {loading && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-          <CircularProgress size={60} />
-          <Box sx={{ mt: 2 }}>{activeStep === 0 ? t("Analyzing your character...") : t("Creating a unique story...")}</Box>
-        </Box>
-      )}
+        {loading && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+            <CircularProgress size={60} />
+            <Box sx={{ mt: 2 }}>{activeStep === 0 ? t("Analyzing your character...") : t("Creating a unique story...")}</Box>
+          </Box>
+        )}
 
-      {!loading && activeStep === 0 && (
-        <Box sx={{ textAlign: 'center' }}>
-          {!isDrawing ? (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleStartDrawing}
-              sx={{ mb: 3 }}
-            >
-              {t("Start Drawing")}
-            </Button>
-          ) : (
-            <>
+        {!loading && activeStep === 0 && (
+          <Box sx={{ textAlign: 'center' }}>
+            {!isDrawing ? (
               <Button
-                variant="outlined"
-                color="secondary"
-                onClick={handleCancelDrawing}
+                variant="contained"
+                color="primary"
+                onClick={handleStartDrawing}
                 sx={{ mb: 3 }}
               >
-                {t("Cancel Drawing")}
+                <TranslatedText text="Start Drawing" />
               </Button>
-              <DrawingCanvas onSaveDrawing={handleSaveDrawing} />
-            </>
-          )}
-        </Box>
-      )}
+            ) : (
+              <>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleCancelDrawing}
+                  sx={{ mb: 3 }}
+                >
+                  <TranslatedText text="Cancel Drawing" />
+                </Button>
+                <DrawingCanvas onSaveDrawing={handleSaveDrawing} />
+              </>
+            )}
+          </Box>
+        )}
 
-      {!loading && activeStep === 1 && renderCharacterAnalysis()}
-      {!loading && activeStep === 2 && story && <StoryDisplay story={story} characterImage={characterImage} />}
+        {!loading && activeStep === 1 && renderCharacterAnalysis()}
+        {!loading && activeStep === 2 && story && <StoryDisplay story={story} characterImage={characterImage} />}
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+          <Button
+            disabled={activeStep === 0}
+            onClick={handleBack}
+          >
+            <TranslatedText text="Back" />
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            disabled={activeStep === steps.length - 1}
+          >
+            <TranslatedText text="Next" />
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };

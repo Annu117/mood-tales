@@ -18,7 +18,7 @@ const languageFlags = {
 };
 
 const Navbar = () => {
-  const { currentLanguage, setCurrentLanguage, t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleLanguageClick = (event) => {
@@ -30,7 +30,7 @@ const Navbar = () => {
   };
 
   const handleLanguageSelect = (lang) => {
-    setCurrentLanguage(lang);
+    setLanguage(lang);
     handleLanguageClose();
   };
 
@@ -87,7 +87,7 @@ const Navbar = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <LanguageIcon />
               <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                {languageFlags[currentLanguage]} {languages[currentLanguage]}
+                {languageFlags[language]} {languages[language]}
               </Typography>
             </Box>
           </IconButton>
@@ -105,7 +105,7 @@ const Navbar = () => {
             {Object.entries(languages).map(([code, name]) => (
               <MenuItem
                 key={code}
-                selected={currentLanguage === code}
+                selected={language === code}
                 onClick={() => handleLanguageSelect(code)}
                 sx={{ py: 1 }}
               >
@@ -116,7 +116,7 @@ const Navbar = () => {
                   primary={name}
                   sx={{ 
                     '& .MuiTypography-root': {
-                      fontWeight: currentLanguage === code ? 'bold' : 'normal'
+                      fontWeight: language === code ? 'bold' : 'normal'
                     }
                   }}
                 />

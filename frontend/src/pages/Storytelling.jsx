@@ -22,10 +22,11 @@ import VoiceControls from '../components/storytelling/VoiceControls';
 import DrawingCanvas from '../components/DrawingCanvas';
 import { useLanguage } from '../utils/LanguageContext';
 import StoryExplanation from '../components/storytelling/StoryExplanation';
+import TranslatedText from '../components/common/TranslatedText';
 
 const Storytelling = () => {
   const theme = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [storyHistory, setStoryHistory] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +38,10 @@ const Storytelling = () => {
   const [showDrawing, setShowDrawing] = useState(false);
   const storyEndRef = useRef(null);
   const announcementRef = useRef(null);
-  const [language, setLanguage] = useState('en'); // Default to English
   const [drawingAnalysis, setDrawingAnalysis] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [currentExplanation, setCurrentExplanation] = useState(null);
+  const [story, setStory] = useState(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -318,7 +319,7 @@ const Storytelling = () => {
             }}
             component="h2"
           >
-            {t('Interactive Storytelling Adventure')}
+            <TranslatedText text="Interactive Storytelling Adventure" />
           </Typography>
           
           <Typography 
@@ -331,7 +332,7 @@ const Storytelling = () => {
               color: theme.palette.text.secondary 
             }}
           >
-            {t('Create an interactive story together with AI. You provide the ideas and direction, and we\'ll craft an engaging tale that evolves as you participate.')}
+            <TranslatedText text="Create an interactive story together with AI. You provide the ideas and direction, and we'll craft an engaging tale that evolves as you participate." />
           </Typography>
 
           {!isStarted && (
@@ -346,7 +347,6 @@ const Storytelling = () => {
               startNewStory={startNewStory}
               handleKeyPress={handleKeyPress}
               language={language}
-              setLanguage={setLanguage}
             />
           )}
 
@@ -381,21 +381,29 @@ const Storytelling = () => {
 
               <VoiceControls storyHistory={storyHistory} language={language} />
 
-              {showDrawing ? (
-                <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 3 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowDrawing(!showDrawing)}
+                  sx={{ mb: 2 }}
+                >
+                  <TranslatedText text={showDrawing ? "Use Text Input" : "Draw Instead"} />
+                </Button>
+
+                {showDrawing ? (
                   <DrawingCanvas onSaveDrawing={handleDrawingSubmit} />
-                </Box>
-              ) : (
-                <StoryInput 
-                  userInput={userInput}
-                  setUserInput={setUserInput}
-                  isLoading={isLoading}
-                  continueStory={continueStory}
-                  handleKeyPress={handleKeyPress}
-                  onShowDrawing={() => setShowDrawing(true)}
-                  drawingAnalysis={drawingAnalysis}
-                />
-              )}
+                ) : (
+                  <StoryInput 
+                    userInput={userInput}
+                    setUserInput={setUserInput}
+                    isLoading={isLoading}
+                    continueStory={continueStory}
+                    handleKeyPress={handleKeyPress}
+                    onShowDrawing={() => setShowDrawing(true)}
+                    drawingAnalysis={drawingAnalysis}
+                  />
+                )}
+              </Box>
               
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                 <Button 
@@ -417,7 +425,7 @@ const Storytelling = () => {
                   }}
                   aria-label={t('Start a new story')}
                 >
-                  {t('Start New Story')}
+                  <TranslatedText text="Start New Story" />
                 </Button>
               </Box>
             </>
@@ -462,6 +470,17 @@ const Storytelling = () => {
           explanation={currentExplanation}
           onClose={() => setShowExplanation(false)}
         />
+      )}
+
+      {story && (
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            <TranslatedText text="Your Story" />
+          </Typography>
+          <Typography paragraph>
+            {story}
+          </Typography>
+        </Box>
       )}
     </>
   );
