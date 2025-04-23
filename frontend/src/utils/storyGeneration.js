@@ -1,11 +1,13 @@
 // src/utils/storyGeneration.js
 import axios from 'axios';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
 /**
  * Generates a story based on the provided characters and scenes
  * 
- * @param {object} storyData - Object containing characters and scenes
- * @returns {Promise<Array<{title: string, content: string, imageId?: string}>>} Promise that resolves to an array of story sections
+ * @param {object} storyData - Object containing characters, scenes, and preferences
+ * @returns {Promise<Array<{title: string, content: string, image?: string}>>} Promise that resolves to an array of story sections
  */
 export const generateStory = async (storyData) => {
   try {
@@ -13,16 +15,26 @@ export const generateStory = async (storyData) => {
     const prompt = createStoryPrompt(storyData);
     
     // Make an API call to the backend
-    const response = await axios.post('http://127.0.0.1:5000/api/start-story', {
-      theme: 'adventure',
-      storyLength: 2,
-      initialPrompt: prompt
+    const response = await axios.post(`${API_BASE_URL}/story`, {
+      query: prompt,
+      story_context: '',
+      cultural_context: storyData.useCulturalContext,
+      language: storyData.selectedLanguage,
+      user_preferences: {
+        age: storyData.age,
+        genre: storyData.selectedGenre,
+        character_name: storyData.characterName,
+        use_mythology: storyData.useMythology,
+        use_cultural_context: storyData.useCulturalContext,
+        fav_genres: storyData.favGenres.split(',').map(g => g.trim())
+      }
     });
     
-    // Return the story sections
+    // Return the story sections with images
     return [{
       title: 'Your Story',
-      content: response.data.storySegment
+      content: response.data.story,
+      image: response.data.image
     }];
     
   } catch (error) {
@@ -35,7 +47,7 @@ export const generateStory = async (storyData) => {
  * Creates a prompt for the language model based on story data
  */
 const createStoryPrompt = (storyData) => {
-  let prompt = "Generate a short children's story with the following elements:\n\n";
+  let prompt = "Generate a children's story with the following elements:\n\n";
   
   // Add character descriptions
   if (storyData.characters.length > 0) {
@@ -55,6 +67,15 @@ const createStoryPrompt = (storyData) => {
       prompt += `- ${scene.label}${keywordsText}\n`;
     });
   }
+  
+  // Add preferences
+  prompt += "\nPreferences:\n";
+  prompt += `- Age: ${storyData.age}\n`;
+  prompt += `- Genre: ${storyData.selectedGenre}\n`;
+  prompt += `- Language: ${storyData.selectedLanguage}\n`;
+  prompt += `- Use Cultural Context: ${storyData.useCulturalContext}\n`;
+  prompt += `- Use Mythology: ${storyData.useMythology}\n`;
+  prompt += `- Favorite Genres: ${storyData.favGenres}\n`;
   
   prompt += "\nThe story should be appropriate for young children, positive, ";
   prompt += "and include specific references to the visual characteristics of the characters and settings. ";

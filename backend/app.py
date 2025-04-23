@@ -23,6 +23,8 @@ from dotenv import load_dotenv
 from ai_service import analyze_character_image, generate_story_with_character
 from image_processor import preprocess_image
 from routes.story_routes import story_bp
+from services.image_generator import generate_story_image
+from services.story_generation import generate_story_segment
 
 
 load_dotenv()
@@ -160,7 +162,7 @@ def fetch_stories():
 #     return response.choices[0].message['content']
 
 @app.route('/api/story', methods=['POST'])
-def generate_story():
+async def generate_story():
     data = request.json
     
     # Extract data from request
@@ -170,37 +172,34 @@ def generate_story():
     language = data.get('language', 'English')
     user_preferences = data.get('user_preferences', {})
     
-    # Process the request
-    emotion = detect_emotion(query)
-    entity_info = detect_entity(query)
-    online_stories = fetch_stories() if cultural_context else "No additional cultural stories fetched."
-    
-    # Generate story
-    story = get_retrieved_story(
-        query=query,
-        emotion=emotion,
-        entity_info=entity_info,
-        cultural_context=cultural_context,
-        online_stories=online_stories,
-        story_context=story_context,
-        user_preferences=user_preferences
-    )
-    
-    # Translate story if needed
-    if language != "English":
-        lang_code = LANGUAGES.get(language, "en")
-        translated_story = translate_text(story, dest_language=lang_code)
-    else:
-        translated_story = story
-    
-    # Return the response
-    return jsonify({
-        'story': translated_story,
-        'emotion': emotion,
-        'entity_info': entity_info,
-        'language': language
-    })
-    
+    try:
+        # Generate story using the existing story generation function
+        story = generate_story_segment(
+            prompt=query,
+            story_length=2,  # Default to medium length
+            theme=user_preferences.get('genre', 'general'),
+            history=story_context,
+            language=language
+        )
+        
+        # Generate image for the story
+        image_result = await generate_story_image(story)
+        
+        # Return the response
+        return jsonify({
+            'story': story,
+            'language': language,
+            'image': image_result.get('image') if image_result.get('success') else None,
+            'image_error': image_result.get('error') if not image_result.get('success') else None
+        })
+        
+    except Exception as e:
+        print(f"Error generating story: {e}")
+        return jsonify({
+            'error': 'Failed to generate story. Please try again.',
+            'details': str(e)
+        }), 500
+
 @app.route('/api/analyze-character', methods=['POST'])
 def analyze_character():
     try:

@@ -208,7 +208,11 @@ def generate_story_segment(prompt, story_length, theme, history=None, language='
         # Generate story using RAG
         rag_generator.setup_rag_chain(theme)
         word_count_map = {1: 50, 2: 100, 3: 200}
-        story = rag_generator.generate_story(prompt, history, word_count=word_count_map[story_length])
+        story = rag_generator.generate_story(
+            user_input=prompt,
+            story_history=history,
+            word_count=word_count_map[story_length]
+        )
 
         if not filter_content_for_kids(story):
             return "Oops, something went wrong with the story. Let's try a new adventure!"
