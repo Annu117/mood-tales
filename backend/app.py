@@ -182,15 +182,24 @@ async def generate_story():
             language=language
         )
         
-        # Generate image for the story
-        image_result = await generate_story_image(story)
+        # Split the story into beginning, middle, and end
+        story_parts = split_story_into_parts(story)
+        
+        # Generate images for each part
+        images = {}
+        for part, content in story_parts.items():
+            image_result = await generate_story_image(
+                story_content=content,
+                scene_description=f"Children's story illustration for the {part} of the story: {content[:100]}"
+            )
+            if image_result.get('success'):
+                images[part] = image_result.get('image')
         
         # Return the response
         return jsonify({
             'story': story,
             'language': language,
-            'image': image_result.get('image') if image_result.get('success') else None,
-            'image_error': image_result.get('error') if not image_result.get('success') else None
+            'images': images
         })
         
     except Exception as e:
@@ -199,6 +208,28 @@ async def generate_story():
             'error': 'Failed to generate story. Please try again.',
             'details': str(e)
         }), 500
+
+def split_story_into_parts(story):
+    """Split the story into beginning, middle, and end parts."""
+    # Simple splitting by paragraphs
+    paragraphs = story.split('\n\n')
+    
+    # Ensure we have at least 3 paragraphs
+    if len(paragraphs) < 3:
+        # If not enough paragraphs, duplicate the content
+        while len(paragraphs) < 3:
+            paragraphs.append(paragraphs[-1])
+    
+    # Take the first, middle, and last paragraphs
+    beginning = paragraphs[0]
+    middle = paragraphs[len(paragraphs) // 2]
+    end = paragraphs[-1]
+    
+    return {
+        'beginning': beginning,
+        'middle': middle,
+        'end': end
+    }
 
 @app.route('/api/analyze-character', methods=['POST'])
 def analyze_character():

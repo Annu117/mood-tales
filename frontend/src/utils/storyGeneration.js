@@ -7,7 +7,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:500
  * Generates a story based on the provided characters and scenes
  * 
  * @param {object} storyData - Object containing characters, scenes, and preferences
- * @returns {Promise<Array<{title: string, content: string, image?: string}>>} Promise that resolves to an array of story sections
+ * @returns {Promise<Array<{title: string, content: string, images?: {beginning: string, middle: string, end: string}}>>} Promise that resolves to an array of story sections
  */
 export const generateStory = async (storyData) => {
   try {
@@ -34,12 +34,50 @@ export const generateStory = async (storyData) => {
     return [{
       title: 'Your Story',
       content: response.data.story,
-      image: response.data.image
+      images: response.data.images
     }];
     
   } catch (error) {
     console.error('Error generating story:', error);
     throw new Error('Failed to generate story. Please try again later.');
+  }
+};
+
+/**
+ * Continues a story based on user input and previous story context
+ * 
+ * @param {object} params - Parameters for continuing the story
+ * @param {string} params.prompt - User's input for continuing the story
+ * @param {number} params.story_length - Length of the story continuation
+ * @param {string} params.theme - Theme of the story
+ * @param {Array} params.history - Previous story messages
+ * @param {string} params.language - Language of the story
+ * @param {boolean} params.useCulturalContext - Whether to use cultural context
+ * @param {boolean} params.useMythology - Whether to use mythology
+ * @returns {Promise<{content: string, images?: {beginning: string, middle: string, end: string}}>} Promise that resolves to the story continuation
+ */
+export const continueStory = async (params) => {
+  try {
+    // Make an API call to the backend
+    const response = await axios.post(`${API_BASE_URL}/continue-story`, {
+      userInput: params.prompt,
+      storyLength: params.story_length,
+      theme: params.theme,
+      storyHistory: params.history,
+      language: params.language,
+      cultural_context: params.useCulturalContext,
+      use_mythology: params.useMythology
+    });
+    
+    // Return the story continuation with images
+    return {
+      content: response.data.storySegment,
+      images: response.data.images
+    };
+    
+  } catch (error) {
+    console.error('Error continuing story:', error);
+    throw new Error('Failed to continue the story. Please try again later.');
   }
 };
 

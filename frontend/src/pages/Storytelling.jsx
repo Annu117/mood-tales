@@ -131,12 +131,15 @@ const Storytelling = () => {
       processedInput = userInput.match(/\[Drawing: (.*?)\]/)[1];
     }
     
-    // Add user input to history
-    setStoryHistory([...storyHistory, {
+    // Add user input to history immediately
+    const newUserEntry = {
       type: 'user',
-      content: processedInput,
+      content: userInput,
       ...(isDrawing && { drawing: userInput.match(/\[Drawing: (.*?)\]/)[0] })
-    }]);
+    };
+    
+    setStoryHistory(prev => [...prev, newUserEntry]);
+    setUserInput(''); // Clear input immediately after adding to history
     
     setIsLoading(true);
     setAnnouncement(t('Continuing your story...'));
@@ -167,10 +170,18 @@ const Storytelling = () => {
       
       const data = await response.json();
       
-      setStoryHistory(prev => [...prev, {
+      // Add AI response to history
+      const newAIEntry = {
         type: 'ai',
         content: data.storySegment
-      }]);
+      };
+      
+      setStoryHistory(prev => [...prev, newAIEntry]);
+      
+      // If there's a drawing prompt in the AI response, show the drawing canvas
+      if (data.storySegment.includes('[Drawing:')) {
+        setShowDrawing(true);
+      }
       
       setAnnouncement(t('Story continued!'));
       
@@ -179,7 +190,6 @@ const Storytelling = () => {
       setError(t('Failed to continue story. Please try again.'));
     }
     
-    setUserInput('');
     setIsLoading(false);
   };
 
