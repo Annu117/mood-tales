@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import traceback
 from langdetect import detect, LangDetectException
 from deep_translator import GoogleTranslator
+from services.image_generator import generate_story_image
+import asyncio
 
 load_dotenv() 
 
@@ -283,3 +285,152 @@ def filter_content_for_kids(text):
             return False
 
     return True
+
+def split_story_into_parts(story):
+    """Split the story into beginning, middle, and end parts."""
+    try:
+        # Split the story into sentences
+        sentences = story.split('. ')
+        
+        # Calculate the number of sentences per part
+        total_sentences = len(sentences)
+        sentences_per_part = total_sentences // 3
+        
+        # Ensure we have at least one sentence per part
+        if sentences_per_part < 1:
+            sentences_per_part = 1
+        
+        # Split into three parts
+        beginning = '. '.join(sentences[:sentences_per_part]) + '.'
+        middle = '. '.join(sentences[sentences_per_part:2*sentences_per_part]) + '.'
+        end = '. '.join(sentences[2*sentences_per_part:]) + '.'
+        
+        # If any part is empty, use the full story
+        if not beginning or not middle or not end:
+            beginning = middle = end = story
+        
+        return {
+            'beginning': beginning,
+            'middle': middle,
+            'end': end
+        }
+    except Exception as e:
+        print(f"Error splitting story into parts: {str(e)}")
+        # Return the full story as all parts if splitting fails
+        return {
+            'beginning': story,
+            'middle': story,
+            'end': story
+        }
+
+async def generate_emotion_aware_story(prompt: str, story_length: int, theme: str, history: list, language: str, emotion: str, user_preferences: dict) -> dict:
+    """
+    Generate a story that takes into account the user's current emotion.
+    
+    Args:
+        prompt (str): The initial prompt for the story
+        story_length (int): Length of the story (1-3)
+        theme (str): Theme of the story
+        history (list): Previous story context
+        language (str): Language for the story
+        emotion (str): Current detected emotion
+        user_preferences (dict): User preferences including age, genre, etc.
+    
+    Returns:
+        dict: Generated story with emotion-aware content and images
+    """
+    try:
+        # Map emotions to story tones and themes
+        emotion_mappings = {
+            'happy': {
+                'tone': 'cheerful and uplifting',
+                'theme_elements': 'joy, celebration, and positive outcomes'
+            },
+            'sad': {
+                'tone': 'gentle and comforting',
+                'theme_elements': 'hope, healing, and emotional growth'
+            },
+            'angry': {
+                'tone': 'calming and understanding',
+                'theme_elements': 'conflict resolution and emotional control'
+            },
+            'fearful': {
+                'tone': 'reassuring and supportive',
+                'theme_elements': 'courage, bravery, and overcoming challenges'
+            },
+            'surprised': {
+                'tone': 'exciting and engaging',
+                'theme_elements': 'wonder, discovery, and magical moments'
+            },
+            'neutral': {
+                'tone': 'balanced and engaging',
+                'theme_elements': 'adventure and personal growth'
+            }
+        }
+
+        # Get emotion-specific elements
+        emotion_data = emotion_mappings.get(emotion.lower(), emotion_mappings['neutral'])
+        
+        # Create emotion-aware prompt with user preferences
+        emotion_aware_prompt = f"""
+        Create a {emotion_data['tone']} story that incorporates {emotion_data['theme_elements']}.
+        The story should be appropriate for a {user_preferences.get('age', 'young')} year old reader
+        who enjoys {user_preferences.get('genre', 'general')} stories.
+        
+        Consider the following elements:
+        - Current emotion: {emotion}
+        - Story theme: {theme}
+        - Language: {language}
+        - Cultural context: {'Yes' if user_preferences.get('useCulturalContext', False) else 'No'}
+        - Mythology elements: {'Yes' if user_preferences.get('useMythology', False) else 'No'}
+        - Character name: {user_preferences.get('characterName', '')}
+        - Special needs: {', '.join(user_preferences.get('specialNeeds', []))}
+        
+        Previous story context:
+        {history}
+        
+        Initial prompt:
+        {prompt}
+        """
+
+        # Generate story using the existing function
+        story = generate_story_segment(
+            prompt=emotion_aware_prompt,
+            story_length=story_length,
+            theme=theme,
+            history=history,
+            language=language
+        )
+
+        # Split the story into parts
+        story_parts = split_story_into_parts(story)
+        
+        # Generate images for each part
+        images = {}
+        for part, content in story_parts.items():
+            # Create a more descriptive scene description for image generation
+            scene_description = f"""
+            Create a children's story illustration for the {part} of the story.
+            The scene should be {emotion_data['tone']} and include {emotion_data['theme_elements']}.
+            Story content: {content[:200]}
+            """
+            
+            image_result = await generate_story_image(
+                story_content=content,
+                scene_description=scene_description
+            )
+            if image_result.get('success'):
+                images[part] = image_result.get('image')
+
+        return {
+            'story': story,
+            'emotion': emotion,
+            'emotion_context': emotion_data,
+            'images': images,
+            'parts': story_parts,
+            'user_preferences': user_preferences
+        }
+
+    except Exception as e:
+        print(f"Error in emotion-aware story generation: {str(e)}")
+        raise Exception(f"Failed to generate emotion-aware story: {str(e)}")

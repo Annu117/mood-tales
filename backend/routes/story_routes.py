@@ -1,11 +1,17 @@
 # routes/story_routes.py
 
 from flask import Blueprint, request, jsonify
-from services.story_generation import generate_story_segment
+from services.story_generation import generate_story_segment, generate_emotion_aware_story
 from dotenv import load_dotenv
 import os
 from ai_service import analyze_character_image
 from image_processor import preprocess_image
+import logging
+import asyncio
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -188,4 +194,46 @@ def get_classification_explanation(label):
         "clothing": "Clothing or wearable items are shown"
     }
     return explanations.get(label.lower(), "This element contributes to the overall composition of the drawing")
+
+@story_bp.route('/generate-emotion-aware-story', methods=['POST'])
+async def generate_emotion_aware_story_route():
+    try:
+        data = request.json
+        
+        # Extract data from request
+        prompt = data.get('prompt', '')
+        story_length = data.get('story_length', 2)
+        theme = data.get('theme', 'general')
+        history = data.get('history', [])
+        language = data.get('language', 'English')
+        emotion = data.get('emotion', 'neutral')
+        user_preferences = data.get('user_preferences', {})
+        
+        # Generate emotion-aware story
+        story_data = await generate_emotion_aware_story(
+            prompt=prompt,
+            story_length=story_length,
+            theme=theme,
+            history=history,
+            language=language,
+            emotion=emotion,
+            user_preferences=user_preferences
+        )
+        
+        # Add emotion context to the response
+        response_data = {
+            'story': story_data['story'],
+            'language': language,
+            'images': story_data['images'],
+            'emotion': story_data['emotion'],
+            'emotion_context': story_data['emotion_context'],
+            'parts': story_data['parts'],
+            'user_preferences': story_data['user_preferences']
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        logger.error(f"Error generating emotion-aware story: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 

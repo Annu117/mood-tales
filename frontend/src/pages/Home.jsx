@@ -393,10 +393,10 @@ const Home = () => {
             <Grid item xs={12} md={6}>
               <Box
                 component="img"
-                src={kidStorytelling}
+                src="/image.png"
                 alt={t('Kid interacting with AI storytelling app')}
                 sx={{
-                  width: '100%',
+                  width: '85%',
                   borderRadius: 6,
                 }}
               />

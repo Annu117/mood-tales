@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Box, 
   TextField, 
@@ -15,12 +15,16 @@ import {
   ListItem,
   ListItemText,
   Chip,
-  Divider
+  Divider,
+  Alert
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import BrushIcon from '@mui/icons-material/Brush';
 import InfoIcon from '@mui/icons-material/Info';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import { useLanguage } from '../../utils/LanguageContext';
+import axios from 'axios';
 
 const DrawingExplanation = ({ explanation, onClose }) => {
   const { t } = useLanguage();
@@ -112,10 +116,77 @@ const StoryInput = ({
   continueStory, 
   handleKeyPress,
   onShowDrawing,
-  drawingAnalysis 
+  drawingAnalysis,
+  language 
 }) => {
   const { t } = useLanguage();
   const [showExplanation, setShowExplanation] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
+  const recognitionRef = useRef(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window) {
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = language;
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setUserInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        setVoiceError(event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [language]);
+
+  const handleVoiceInput = async () => {
+    try {
+      setVoiceError(null);
+      setIsListening(true);
+
+      // Try backend voice recognition first
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/voice`, {
+        language: language
+      });
+
+      if (response.data.success) {
+        setUserInput(response.data.transcript);
+      } else {
+        // Fallback to browser speech recognition
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        } else {
+          setVoiceError('Speech recognition is not supported in your browser.');
+        }
+      }
+    } catch (err) {
+      console.error('Error with voice input:', err);
+      // Fallback to browser speech recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+      } else {
+        setVoiceError('Speech recognition is not supported in your browser.');
+      }
+    }
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
 
   return (
     <>
@@ -151,6 +222,24 @@ const StoryInput = ({
           gap: 1,
           height: '100%'
         }}>
+          <Tooltip title={isListening ? t('Stop Voice Input') : t('Start Voice Input')}>
+            <IconButton
+              onClick={isListening ? stopVoiceInput : handleVoiceInput}
+              disabled={isLoading}
+              sx={{
+                backgroundColor: isListening ? 'error.main' : 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: isListening ? 'error.dark' : 'primary.dark',
+                },
+                '&:disabled': {
+                  backgroundColor: 'grey.300',
+                },
+              }}
+            >
+              {isListening ? <MicOffIcon /> : <MicIcon />}
+            </IconButton>
+          </Tooltip>
           <Tooltip title={t('Draw something')}>
             <IconButton
               onClick={onShowDrawing}
@@ -200,14 +289,24 @@ const StoryInput = ({
                 transform: 'scale(1.05)',
               },
             }}
-          >
-            {!isLoading && <SendIcon />}
-          </Button>
+          />
         </Box>
       </Box>
-      {drawingAnalysis && showExplanation && (
+
+      {/* Voice Error Alert */}
+      {voiceError && (
+        <Alert 
+          severity="error" 
+          sx={{ mt: 2 }}
+          onClose={() => setVoiceError(null)}
+        >
+          {voiceError}
+        </Alert>
+      )}
+
+      {showExplanation && (
         <DrawingExplanation 
-          explanation={drawingAnalysis.explanation} 
+          explanation={drawingAnalysis} 
           onClose={() => setShowExplanation(false)} 
         />
       )}

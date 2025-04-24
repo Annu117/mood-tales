@@ -18,11 +18,13 @@ import tempfile
 import uuid
 from flask import send_file
 from gtts.lang import tts_langs
+import speech_recognition as sr
 
 from dotenv import load_dotenv
 from ai_service import analyze_character_image, generate_story_with_character
 from image_processor import preprocess_image
 from routes.story_routes import story_bp
+from routes.emotion_routes import emotion_bp
 from services.image_generator import generate_story_image
 from services.story_generation import generate_story_segment
 
@@ -31,6 +33,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.register_blueprint(story_bp, url_prefix='/api')
+app.register_blueprint(emotion_bp, url_prefix='/api')
 CORS(app)  # Enable CORS for all routes
 # Load spaCy model for entity detection
 nlp = spacy.load("en_core_web_sm")
@@ -74,18 +77,43 @@ GLOBAL_MYTHOLOGY = {
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/api/voice", methods=["POST"])
-def voice_input():
+def handle_voice():
     try:
-        data = request.json
+        data = request.get_json()
         language = data.get('language', 'en')
         
-        result = recognize_speech(language)
-        return jsonify(result)
+        # Initialize speech recognition
+        recognizer = sr.Recognizer()
+        
+        # Use microphone as source
+        with sr.Microphone() as source:
+            # Adjust for ambient noise
+            recognizer.adjust_for_ambient_noise(source)
+            
+            # Listen for audio input
+            audio = recognizer.listen(source)
+            
+            try:
+                # Use Google Speech Recognition
+                text = recognizer.recognize_google(audio, language=language)
+                return jsonify({
+                    'success': True,
+                    'transcript': text
+                })
+            except sr.UnknownValueError:
+                return jsonify({
+                    'success': False,
+                    'error': 'Could not understand audio'
+                })
+            except sr.RequestError as e:
+                return jsonify({
+                    'success': False,
+                    'error': f'Could not request results; {str(e)}'
+                })
     except Exception as e:
-        print(f"Error in voice input: {str(e)}")
         return jsonify({
-            "success": False,
-            "error": str(e)
+            'success': False,
+            'error': str(e)
         }), 500
 
 def detect_emotion(text):
