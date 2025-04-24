@@ -4,6 +4,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { useLanguage } from '../../utils/LanguageContext';
 import StoryImageGallery from './StoryImageGallery';
 import StoryContinuation from './StoryContinuation';
+import { useScreenReaderAnnouncement } from '../../utils/ScreenReaderAnnouncer';
 
 const StorySection = ({
   section,
@@ -18,7 +19,18 @@ const StorySection = ({
 }) => {
   const theme = useTheme();
   const { t } = useLanguage();
+  const { announce } = useScreenReaderAnnouncement();
   const isLastSection = sectionIndex === totalSections - 1;
+
+  const handleDownloadPDF = () => {
+    downloadStoryAsPDF();
+    announce(t('Downloading story as PDF...'));
+  };
+
+  const handleDownloadImage = (part, sectionIndex) => {
+    downloadImage(part, sectionIndex);
+    announce(t('Downloading image...'));
+  };
 
   return (
     <Card 
@@ -34,6 +46,7 @@ const StorySection = ({
         },
       }}
       elevation={3}
+      aria-labelledby={`story-section-${sectionIndex}-title`}
     >
       <Box 
         sx={{ 
@@ -54,7 +67,7 @@ const StorySection = ({
           {sectionIndex === 0 && section.images && Object.keys(section.images).length > 0 && (
             <Tooltip title={t("Download as PDF")}>
               <IconButton 
-                onClick={downloadStoryAsPDF} 
+                onClick={handleDownloadPDF} 
                 aria-label={t("Download story as PDF")}
                 sx={{ 
                   color: 'white',
@@ -75,7 +88,7 @@ const StorySection = ({
         <StoryImageGallery 
           images={section.images} 
           sectionIndex={sectionIndex} 
-          downloadImage={downloadImage} 
+          downloadImage={handleDownloadImage} 
         />
         
         <Typography 
@@ -86,6 +99,7 @@ const StorySection = ({
             whiteSpace: 'pre-line'
           }}
           aria-labelledby={`story-section-${sectionIndex}-title`}
+          role="article"
         >
           {section.content}
         </Typography>

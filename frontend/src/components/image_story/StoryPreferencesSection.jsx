@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { useLanguage } from '../../utils/LanguageContext';
 import PreferencesPanel from '../PreferencesPanel';
+import { useScreenReaderAnnouncement } from '../../utils/ScreenReaderAnnouncer';
 
 const SPECIAL_NEEDS_OPTIONS = [
   { id: 'dyslexia', label: 'Dyslexia' },
@@ -31,13 +32,16 @@ const StoryPreferencesSection = ({
 }) => {
   const theme = useTheme();
   const { t } = useLanguage();
+  const { announce } = useScreenReaderAnnouncement();
   const [customNeed, setCustomNeed] = useState('');
 
   const handleSpecialNeedsChange = (needId) => {
     setSpecialNeeds(prev => {
       if (prev.includes(needId)) {
+        announce(t(`${needId} accommodation removed`));
         return prev.filter(id => id !== needId);
       } else {
+        announce(t(`${needId} accommodation added`));
         return [...prev, needId];
       }
     });
@@ -46,12 +50,14 @@ const StoryPreferencesSection = ({
   const handleAddCustomNeed = () => {
     if (customNeed.trim()) {
       setSpecialNeeds(prev => [...prev, `custom_${customNeed.trim()}`]);
+      announce(t(`Custom need ${customNeed} added`));
       setCustomNeed('');
     }
   };
 
   const handleRemoveCustomNeed = (needId) => {
     setSpecialNeeds(prev => prev.filter(id => id !== needId));
+    announce(t(`Custom need ${needId.replace('custom_', '')} removed`));
   };
 
   const handleKeyPress = (e) => {
@@ -59,6 +65,11 @@ const StoryPreferencesSection = ({
       e.preventDefault();
       handleAddCustomNeed();
     }
+  };
+
+  const handleGenerateClick = () => {
+    announce(t('Generating story with current preferences...'));
+    handleGenerateStory();
   };
 
   return (
@@ -70,6 +81,8 @@ const StoryPreferencesSection = ({
         borderRadius: 4,
         background: 'linear-gradient(to right, #f9f9ff, #ffffff)'
       }}
+      role="region"
+      aria-label={t('Story Preferences')}
     >
       <Typography 
         variant="h5" 
@@ -101,8 +114,8 @@ const StoryPreferencesSection = ({
         />
 
         {/* Special Needs Section */}
-        <Box sx={{ mt: 3, mb: 3 }}>
-          <Typography variant="h6" gutterBottom color="primary">
+        <Box sx={{ mt: 3, mb: 3 }} role="group" aria-labelledby="special-needs-title">
+          <Typography variant="h6" gutterBottom color="primary" id="special-needs-title">
             {t('Special Needs Accommodations (Optional)')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -110,7 +123,10 @@ const StoryPreferencesSection = ({
           </Typography>
           
           {/* Predefined Special Needs */}
-          <FormGroup sx={{ mb: 3 }}>
+          <FormGroup sx={{ mb: 3 }} role="group" aria-labelledby="predefined-needs-title">
+            <Typography id="predefined-needs-title" className="sr-only">
+              {t('Predefined special needs options')}
+            </Typography>
             {SPECIAL_NEEDS_OPTIONS.map((option) => (
               <FormControlLabel
                 key={option.id}
@@ -127,8 +143,8 @@ const StoryPreferencesSection = ({
           </FormGroup>
 
           {/* Custom Special Needs Input */}
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" gutterBottom color="primary">
+          <Box sx={{ mb: 2 }} role="group" aria-labelledby="custom-needs-title">
+            <Typography variant="subtitle1" gutterBottom color="primary" id="custom-needs-title">
               {t('Add Custom Special Need')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
@@ -141,12 +157,14 @@ const StoryPreferencesSection = ({
                 placeholder={t('Enter custom special need or scenario')}
                 disabled={isLoading}
                 sx={{ mb: 2 }}
+                aria-label={t('Custom special need input')}
               />
               <IconButton 
                 onClick={handleAddCustomNeed}
                 disabled={!customNeed.trim() || isLoading}
                 color="primary"
                 sx={{ mt: 0.5 }}
+                aria-label={t('Add custom need')}
               >
                 <AddIcon />
               </IconButton>
@@ -155,8 +173,8 @@ const StoryPreferencesSection = ({
 
           {/* Display Custom Special Needs */}
           {specialNeeds.filter(need => need.startsWith('custom_')).length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom color="text.secondary">
+            <Box sx={{ mb: 2 }} role="group" aria-labelledby="current-custom-needs-title">
+              <Typography variant="subtitle2" gutterBottom color="text.secondary" id="current-custom-needs-title">
                 {t('Custom Special Needs:')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -170,6 +188,7 @@ const StoryPreferencesSection = ({
                       disabled={isLoading}
                       color="primary"
                       variant="outlined"
+                      aria-label={`${need.replace('custom_', '')} - press delete to remove`}
                     />
                   ))}
               </Box>
@@ -181,7 +200,7 @@ const StoryPreferencesSection = ({
       <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Button 
           variant="contained" 
-          onClick={handleGenerateStory} 
+          onClick={handleGenerateClick} 
           disabled={isLoading}
           startIcon={<AutoStoriesIcon />}
           aria-label={isLoading ? t('Generating story, please wait') : t('Generate Story')}

@@ -3,6 +3,7 @@ import { Box, Container, Alert } from '@mui/material';
 import { useLanguage } from '../utils/LanguageContext';
 import { generateStory, continueStory } from '../utils/storyGeneration';
 import { downloadStoryAsPDF, downloadImage as downloadImageUtil } from '../components/image_story/storyUtils';
+import ScreenReaderAnnouncer, { useScreenReaderAnnouncement } from '../utils/ScreenReaderAnnouncer';
 
 // Component imports
 import StoryHeader from '../components/image_story/StoryHeader';
@@ -11,6 +12,7 @@ import StorySection from '../components/image_story/StorySection';
 
 const Story = () => {
   const { t } = useLanguage();
+  const { announce } = useScreenReaderAnnouncement();
   const [age, setAge] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -33,6 +35,7 @@ const Story = () => {
     setError(null);
     setUserInput('');
     setStoryHistory([]);
+    announce(t('Generating your story, please wait...'));
     
     try {
       const storyData = {
@@ -59,6 +62,7 @@ const Story = () => {
 
       const generated = await generateStory(storyData);
       setStory(generated);
+      announce(t('Story generated successfully!'));
       
       // Store generated images
       if (generated[0]?.images) {
@@ -72,6 +76,7 @@ const Story = () => {
       }]);
     } catch (err) {
       setError(err.message || t('Failed to generate story. Please try again.'));
+      announce(t('Error generating story. Please try again.'), 'assertive');
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +87,7 @@ const Story = () => {
     
     setIsContinuing(true);
     setError(null);
+    announce(t('Continuing your story...'));
     
     try {
       // Add user input to history
@@ -110,6 +116,7 @@ const Story = () => {
       
       // Update story with the new section
       setStory([...story, newSection]);
+      announce(t('Story continued successfully!'));
       
       // Update history
       setStoryHistory([
@@ -121,6 +128,7 @@ const Story = () => {
       setUserInput('');
     } catch (err) {
       setError(err.message || t('Failed to continue the story. Please try again.'));
+      announce(t('Error continuing story. Please try again.'), 'assertive');
     } finally {
       setIsContinuing(false);
     }
@@ -138,6 +146,7 @@ const Story = () => {
 
   return (
     <Box component="main">
+      <ScreenReaderAnnouncer />
       {/* Header with gradient background */}
       <StoryHeader />
 

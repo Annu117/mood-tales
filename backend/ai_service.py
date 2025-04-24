@@ -311,7 +311,7 @@ def extract_features_from_caption(caption):
     for category, elements in visual_elements.items():
         for element in elements:
             if element in caption_lower:
-            features.append(element)
+                features.append(element)
     
     # Add at least two features if none were found
     if not features:
