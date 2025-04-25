@@ -158,7 +158,10 @@ class RAGStoryGenerator:
             """)
 
         self.document_chain = create_stuff_documents_chain(llm=self.llm, prompt=self.prompt)
-        self.chain = create_retrieval_chain(self.retriever, self.document_chain)
+        self.chain = create_retrieval_chain(
+            retriever=self.retriever,
+            combine_docs_chain=self.document_chain
+        )
         
 
     def generate_story(self, user_input, story_history=None, word_count=50):

@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 emotion_bp = Blueprint('emotion', __name__)
-emotion_service = EmotionDetectionService(os.getenv('EMOTION_API_URL', 'https://ae8a-34-16-207-58.ngrok-free.app/detect_emotion'))
+emotion_service = EmotionDetectionService(os.getenv('EMOTION_API_URL', 'https://f551-34-16-204-165.ngrok-free.app/detect_emotion'))
 
 @emotion_bp.route('/start-monitoring', methods=['POST'])
 def start_monitoring():
@@ -57,7 +57,7 @@ def capture_emotion():
 def test_emotion_api():
     try:
         # Test the emotion detection API connection
-        response = requests.get(os.getenv('EMOTION_API_URL', 'https://ae8a-34-16-207-58.ngrok-free.app/detect_emotion'))
+        response = requests.get(os.getenv('EMOTION_API_URL', 'https://f551-34-16-204-165.ngrok-free.app/detect_emotion'))
         return jsonify({'status': 'connected', 'response': response.status_code})
     except Exception as e:
         return jsonify({'error': str(e)}), 500 

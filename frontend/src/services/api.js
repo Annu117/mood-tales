@@ -33,3 +33,25 @@ export const generateStory = async (characterAnalysis) => {
   
   return response.json();
 };
+
+export const generateStoryFromDrawing = async (drawingData) => {
+  const response = await fetch(`${API_BASE_URL}/generate-story-from-drawing`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      drawing: drawingData.drawing,
+      analysis: drawingData.analysis,
+      characterName: drawingData.characterName,
+      emotion: drawingData.emotion,
+      language: drawingData.language || 'en'
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to generate story from drawing');
+  }
+  
+  return response.json();
+};

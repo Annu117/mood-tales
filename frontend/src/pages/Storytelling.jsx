@@ -9,6 +9,8 @@ import {
   Alert,
   AlertTitle,
   Snackbar,
+  IconButton,
+  Tooltip,
   Link
 } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -18,7 +20,6 @@ import StoryInput from '../components/storytelling/StoryInput';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Fab, Zoom } from '@mui/material';
 import StoryReader from '../components/storytelling/StoryReader';
-import VoiceControls from '../components/storytelling/VoiceControls';
 import DrawingCanvas from '../components/DrawingCanvas';
 import { useLanguage } from '../utils/LanguageContext';
 import StoryExplanation from '../components/storytelling/StoryExplanation';
@@ -44,11 +45,6 @@ const Storytelling = () => {
   const [currentExplanation, setCurrentExplanation] = useState(null);
   const [story, setStory] = useState(null);
 
-  // State variables for voice input
-  const [isListening, setIsListening] = useState(false);
-  const [voiceError, setVoiceError] = useState(null);
-  const recognitionRef = useRef(null);
-
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
@@ -69,17 +65,6 @@ const Storytelling = () => {
       return () => clearTimeout(timeoutId);
     }
   }, [announcement]);
-
-  // Initialization of speech recognition
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window) {
-      recognitionRef.current = new window.webkitSpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = language;
-      // ... event handlers
-    }
-  }, [language]);
 
   const startNewStory = async () => {
     setIsLoading(true);
@@ -250,7 +235,7 @@ const Storytelling = () => {
       const data = await response.json();
       const description = `[Drawing: ${data.description}]`;
       setUserInput(description);
-      setDrawingAnalysis(data);
+      setDrawingAnalysis(data.explanation);
       setAnnouncement(t('Drawing analyzed! You can now continue your story.'));
     } catch (error) {
       console.error('Error analyzing drawing:', error);
@@ -267,29 +252,6 @@ const Storytelling = () => {
     }]);
     setCurrentExplanation(response.explanation);
     setShowExplanation(true);
-  };
-
-  const handleVoiceInput = async () => {
-    try {
-      setError(null);
-      setIsLoading(true);
-
-      // Try backend voice recognition first
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/voice`, {
-        language: language
-      });
-
-      if (response.data.success) {
-        setUserInput(response.data.transcript);
-      } else {
-        setError(t('Failed to capture voice input. Please try again.'));
-      }
-    } catch (err) {
-      console.error('Error with voice input:', err);
-      setError(t('Failed to capture voice input. Please try again.'));
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -379,7 +341,6 @@ const Storytelling = () => {
               startNewStory={startNewStory}
               handleKeyPress={handleKeyPress}
               language={language}
-              handleVoiceInput={handleVoiceInput}
             />
           )}
 
@@ -411,8 +372,6 @@ const Storytelling = () => {
                 <StoryReader storyHistory={storyHistory} />
                 <div ref={storyEndRef} tabIndex={-1} />
               </Paper>
-
-              <VoiceControls storyHistory={storyHistory} language={language} />
 
               <Box sx={{ mb: 3 }}>
                 <Button

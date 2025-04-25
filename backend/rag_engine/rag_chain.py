@@ -33,7 +33,7 @@ def setup_rag_chain():
     llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.7)
     return create_retrieval_chain(
         retriever=retriever,
-        combine_documents_chain=create_stuff_documents_chain(llm=llm, prompt=prompt)
+        combine_docs_chain=create_stuff_documents_chain(llm=llm, prompt=prompt)
     )
 
 # Reusable story generator

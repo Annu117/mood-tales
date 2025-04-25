@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -12,11 +12,19 @@ import {
   Button,
   CircularProgress,
   Box,
-  useTheme
+  useTheme,
+  IconButton,
+  Tooltip,
+  Alert
 } from '@mui/material';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import VoiceInput from './VoiceInput';
 import LanguageIcon from '@mui/icons-material/Language';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import { useLanguage } from '../../utils/LanguageContext';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' },
@@ -51,16 +59,96 @@ const StorySettings = ({
   setLanguage
 }) => {
   const muiTheme = useTheme();
-  
-  const handleVoiceInput = (text) => {
-    setUserInput(text);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceError, setVoiceError] = useState(null);
+  const recognitionRef = useRef(null);
+
+  // Language code mapping for both gTTS and browser speech synthesis
+  const languageCodes = {
+    'en': { gtts: 'en', browser: 'en-US' },      // English
+    'es': { gtts: 'es', browser: 'es-ES' },      // Spanish
+    'fr': { gtts: 'fr', browser: 'fr-FR' },      // French
+    'hi': { gtts: 'hi', browser: 'hi-IN' },      // Hindi
+    'zh': { gtts: 'zh', browser: 'zh-CN' },      // Chinese
+    'ar': { gtts: 'ar', browser: 'ar-SA' },      // Arabic
+    'de': { gtts: 'de', browser: 'de-DE' },      // German
+    'ja': { gtts: 'ja', browser: 'ja-JP' },      // Japanese
+    'ru': { gtts: 'ru', browser: 'ru-RU' },      // Russian
+    'pt': { gtts: 'pt', browser: 'pt-BR' },      // Portuguese
+    'bn': { gtts: 'bn', browser: 'bn-BD' },      // Bengali
+    'ur': { gtts: 'ur', browser: 'ur-PK' },      // Urdu
+    'te': { gtts: 'te', browser: 'te-IN' },      // Telugu
+    'ta': { gtts: 'ta', browser: 'ta-IN' },      // Tamil
+    'mr': { gtts: 'mr', browser: 'mr-IN' },      // Marathi
+    'ko': { gtts: 'ko', browser: 'ko-KR' }       // Korean
+  };
+
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window) {
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = languageCodes[language]?.browser || 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setUserInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        setVoiceError(event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [language]);
+
+  const handleVoiceInput = async () => {
+    try {
+      setVoiceError(null);
+      setIsListening(true);
+
+      // Try backend voice recognition first
+      const response = await axios.post(`${API_BASE_URL}/voice`, {
+        language: languageCodes[language]?.gtts || 'en'
+      });
+
+      if (response.data.success) {
+        setUserInput(response.data.transcript);
+      } else {
+        // Fallback to browser speech recognition
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        } else {
+          setVoiceError('Speech recognition is not supported in your browser.');
+        }
+      }
+    } catch (err) {
+      console.error('Error with voice input:', err);
+      // Fallback to browser speech recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+      } else {
+        setVoiceError('Speech recognition is not supported in your browser.');
+      }
+    }
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
   };
 
   return (
     <Card 
       sx={{ 
         mb: 4, 
-        // backgroundColor: 'rgba(245, 245, 255, 0.8)',
         background: 'linear-gradient(135deg, rgba(78, 125, 233, 0.1) 0%, rgba(255, 109, 0, 0.1) 100%)',
         backgroundImage: 'linear-gradient(135deg, rgba(78, 125, 233, 0.05) 0%, rgba(255, 109, 0, 0.05) 100%)',
         borderRadius: 4,
@@ -145,8 +233,44 @@ const StorySettings = ({
             sx={{ mr: 1 }}
             aria-label="Story prompt input"
           />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <VoiceInput onInputReceived={handleVoiceInput} disabled={isLoading} />
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 1,
+            height: '100%',
+            minWidth: '48px'
+          }}>
+            <Tooltip 
+              title={isListening ? "Stop Voice Input" : "Start Voice Input"}
+              placement="top"
+              arrow
+            >
+              <IconButton
+                onClick={isListening ? stopVoiceInput : handleVoiceInput}
+                disabled={isLoading}
+                sx={{
+                  backgroundColor: isListening ? 'error.main' : 'primary.main',
+                  color: 'white',
+                  width: '48px',
+                  height: '48px',
+                  minWidth: '48px',
+                  '&:hover': {
+                    backgroundColor: isListening ? 'error.dark' : 'primary.dark',
+                    transform: 'scale(1.05)',
+                  },
+                  '&:disabled': {
+                    backgroundColor: 'grey.300',
+                  },
+                  transition: 'all 0.3s ease',
+                  boxShadow: muiTheme.shadows[2],
+                  '& .MuiSvgIcon-root': {
+                    fontSize: '1.5rem'
+                  }
+                }}
+              >
+                {isListening ? <MicOffIcon /> : <MicIcon />}
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
         
@@ -175,6 +299,20 @@ const StorySettings = ({
         >
           {isLoading ? <CircularProgress size={24} /> : 'Start My Story!'}
         </Button>
+
+        {voiceError && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mt: 2,
+              borderRadius: 2,
+              boxShadow: muiTheme.shadows[1]
+            }}
+            onClose={() => setVoiceError(null)}
+          >
+            {voiceError}
+          </Alert>
+        )}
       </CardContent>
     </Card>
   );

@@ -467,7 +467,7 @@ const Story = () => {
           </Alert>
         )}
 
-        {/* Voice Input Button */}
+        {/* Voice Input Button
         <Box sx={{ position: 'fixed', bottom: 20, left: 20, zIndex: 1000 }}>
           <Tooltip title={isListening ? t('Stop Voice Input') : t('Start Voice Input')}>
             <IconButton
@@ -484,7 +484,7 @@ const Story = () => {
               {isListening ? <MicOffIcon /> : <MicIcon />}
             </IconButton>
           </Tooltip>
-        </Box>
+        </Box> */}
 
         {/* Voice Error Alert */}
         {voiceError && (
