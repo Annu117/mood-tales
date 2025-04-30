@@ -52,17 +52,24 @@ class RAGStoryGenerator:
             "animal": [
                 "https://www.talesofpanchatantra.com/",
                 "https://www.kidsgen.com/fables_and_fairytales/african_folk_tales/",
-                "https://www.worldoftales.com/"
+                "https://www.worldoftales.com/",
+                "https://pantheon.org/",
+                "https://www.worldhistory.org/mythology/",
+
             ],
             "bedtime": [
                 "https://www.bedtimeshortstories.com/",
                 "https://www.shortkidstories.com/",
-                "https://www.storyberries.com/"
+                "https://www.storyberries.com/",
+                "https://www.freechildrenstories.com/",
+                "https://www.littlefox.com/",
             ],
             "general": [
                 "https://www.pitara.com/fiction-for-kids/stories-for-kids/",
                 "https://americanliterature.com/childrens-stories",
-                "https://www.indiaparenting.com/stories/"
+                "https://www.indiaparenting.com/stories/",
+                "https://www.uniteforliteracy.com/",
+                "https://www.globalstorybooks.net/"
             ]
         }
 

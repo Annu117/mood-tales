@@ -8,6 +8,8 @@ from ai_service import analyze_character_image
 from image_processor import preprocess_image
 import logging
 import asyncio
+import openai
+from rag_engine.rag_chain import generate_story_rag
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -236,4 +238,74 @@ async def generate_emotion_aware_story_route():
     except Exception as e:
         logger.error(f"Error generating emotion-aware story: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@story_bp.route('/generate-story-from-drawing', methods=['POST', 'OPTIONS'])
+def generate_story_from_drawing():
+    if request.method == 'OPTIONS':
+        return '', 200
+        
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+            
+        data = request.json
+        if not data or 'drawing' not in data or 'analysis' not in data:
+            return jsonify({"error": "Missing required data"}), 400
+            
+        drawing_data = data.get('drawing')
+        analysis = data.get('analysis')
+        character_name = data.get('characterName', 'Character')
+        emotion = data.get('emotion', 'neutral')
+        language = data.get('language', 'en')
+        
+        # Generate story using the drawing analysis
+        story = generate_story_with_drawing(
+            drawing_data=drawing_data,
+            analysis=analysis,
+            character_name=character_name,
+            emotion=emotion,
+            language=language
+        )
+        
+        if not story:
+            return jsonify({"error": "Failed to generate story"}), 500
+            
+        return jsonify({
+            "story": story,
+            "drawing_analysis": analysis
+        })
+        
+    except Exception as e:
+        print(f"Error generating story from drawing: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+def generate_story_with_drawing(drawing_data, analysis, character_name, emotion, language):
+    """Generate a story incorporating the drawing analysis using RAG."""
+    try:
+        # Prepare character analysis for RAG
+        character_analysis = {
+            "name": character_name,
+            "description": analysis.get('description', ''),
+            "emotion": analysis.get('emotion', emotion),
+            "characteristics": analysis.get('features', []),
+            "colors": analysis.get('colors', []),
+            "ageRange": "5-12",  # Default age range for children's stories
+            "language": language
+        }
+        
+        # Generate story using RAG
+        story = generate_story_rag(character_analysis)
+        
+        if not story:
+            return None
+            
+        # If the story is a dictionary (from RAG), extract the content
+        if isinstance(story, dict):
+            story = story.get('content', '')
+            
+        return story
+        
+    except Exception as e:
+        print(f"Error in generate_story_with_drawing: {str(e)}")
+        return None
 

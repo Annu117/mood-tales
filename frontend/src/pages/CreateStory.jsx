@@ -21,13 +21,13 @@ import {
 } from '@mui/material';
 import DrawingCanvas from '../components/DrawingCanvas';
 import StoryDisplay from '../components/StoryDisplay';
-import { analyzeCharacter, generateStory } from '../services/api';
+import { analyzeCharacter, generateStory, generateStoryFromDrawing } from '../services/api';
 import { useLanguage } from '../utils/LanguageContext';
 import TranslatedText from '../components/common/TranslatedText';
 import { StoryInput } from '../components/StoryInput';
 
 const CreateStory = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
   const [characterImage, setCharacterImage] = useState(null);
   const [characterAnalysis, setCharacterAnalysis] = useState(null);
@@ -82,7 +82,15 @@ const CreateStory = () => {
 
     setLoading(true);
     try {
-      const generatedStory = await generateStory({ ...characterAnalysis, ...editableAnalysis });
+      const storyData = {
+        drawing: characterImage,
+        analysis: characterAnalysis,
+        characterName: editableAnalysis.name,
+        emotion: editableAnalysis.emotion,
+        language: language
+      };
+
+      const generatedStory = await generateStoryFromDrawing(storyData);
       setStory(generatedStory);
       setActiveStep(2);
     } catch (err) {
@@ -258,7 +266,13 @@ const CreateStory = () => {
         )}
 
         {!loading && activeStep === 1 && renderCharacterAnalysis()}
-        {!loading && activeStep === 2 && story && <StoryDisplay story={story} characterImage={characterImage} />}
+        {!loading && activeStep === 2 && story && (
+          <StoryDisplay 
+            story={story} 
+            characterImage={characterImage} 
+            analysis={characterAnalysis}
+          />
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
           <Button

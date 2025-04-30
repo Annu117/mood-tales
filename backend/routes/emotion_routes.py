@@ -57,7 +57,7 @@ def capture_emotion():
 def test_emotion_api():
     try:
         # Test the emotion detection API connection
-        response = requests.get(os.getenv('EMOTION_API_URL', 'https://f551-34-16-204-165.ngrok-free.app/detect_emotion'))
+        response = requests.get(os.getenv('EMOTION_API_URL', 'https://b35d-34-87-77-59.ngrok-free.app/detect_emotion'))
         return jsonify({'status': 'connected', 'response': response.status_code})
     except Exception as e:
         return jsonify({'error': str(e)}), 500 
